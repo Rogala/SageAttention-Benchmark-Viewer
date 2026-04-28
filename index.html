@@ -85,11 +85,47 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
 .notice{padding:60px 24px;text-align:center;color:var(--muted);font-size:16px}
 .notice code{background:var(--bg2);padding:3px 8px;border-radius:4px;color:var(--text)}
+
+/* Help button */
+.help-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);
+  background:#5b8af7;color:#fff;font-size:15px;font-weight:700;cursor:pointer;
+  flex-shrink:0;transition:all .15s;line-height:1;display:flex;align-items:center;justify-content:center}
+.help-btn:hover{border-color:#3dd68c;color:#FF006E}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);
+  z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  width:560px;max-width:calc(100vw - 32px);max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-title{font-size:16px;font-weight:600;color:var(--text)}
+.modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;
+  padding:2px 6px;border-radius:4px;transition:color .15s}
+.modal-close:hover{color:#f05050}
+.modal-body{padding:20px}
+.help-section{margin-bottom:22px}
+.help-section:last-child{margin-bottom:0}
+.help-section-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px}
+.help-section p{font-size:13px;color:var(--muted);margin-bottom:8px;line-height:1.6}
+.help-link{display:inline-block;font-size:13px;color:#58a6ff;text-decoration:none;
+  padding:5px 12px;border:1px solid #30363d;border-radius:6px;background:var(--bg3);
+  transition:border-color .15s}
+.help-link:hover{border-color:#58a6ff}
+.help-download{color:#3dd68c;border-color:rgba(61,214,140,.3)}
+.help-download:hover{border-color:#3dd68c}
+.help-code{background:var(--bg);border:1px solid var(--border);border-radius:6px;
+  padding:10px 14px;font-family:'Consolas','Fira Mono',monospace;font-size:13px;
+  color:#e8eaf0;letter-spacing:.2px;user-select:all}
+.help-note{font-size:12px;color:var(--muted);margin-top:8px}
+.help-note code{background:var(--bg);padding:2px 6px;border-radius:4px;color:#a8d8a8}
 </style>
 </head>
 <body>
 
 <div class="header">
+  <button class="help-btn" onclick="document.getElementById('helpModal').classList.add('open')" title="Help">?</button>
   <h1><span>Sage</span>Attention Benchmark Viewer</h1>
   <div class="slots" id="slots"></div>
   <div class="add-btn" id="addBtn" onclick="addSlot()">+ Add file</div>
@@ -610,5 +646,50 @@ function buildTable(id, cfgs, labels){
   if(el) el.innerHTML=html;
 }
 </script>
+<!-- Help Modal -->
+<div class="modal-overlay" id="helpModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Help &amp; Getting Started</span>
+      <button class="modal-close" onclick="document.getElementById('helpModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="help-section">
+        <div class="help-section-title">📦 Repository</div>
+        <p>Full documentation, setup instructions and community results are available on GitHub:</p>
+        <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer" target="_blank" class="help-link">
+          github.com/Rogala/SageAttention-Benchmark-Viewer
+        </a>
+      </div>
+
+      <div class="help-section">
+        <div class="help-section-title">🐍 Benchmark Script</div>
+        <p>To generate your own results, download the script and run it locally:</p>
+        <a href="https://raw.githubusercontent.com/Rogala/SageAttention-Benchmark-Viewer/main/sage_bench_models.py"
+           download="sage_bench_models.py" class="help-link help-download">
+          ⬇ sage_bench_models.py
+        </a>
+        <p style="margin-top:12px">Run command:</p>
+        <div class="help-code">python sage_bench_models.py --warmup 20 --iters 100</div>
+        <p class="help-note">The script automatically saves the result as a JSON file named after your GPU (e.g. <code>RTX-5060_Ti-16GB.json</code>) in the current directory.</p>
+      </div>
+
+      <div class="help-section">
+        <div class="help-section-title">📤 Share Your Results</div>
+        <p>Upload your JSON to the community database via GitHub:</p>
+        <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/upload/main/results" target="_blank" class="help-link">
+          Upload via GitHub <small style="opacity:.6">(account required)</small>
+        </a>
+        <span style="color:var(--muted);margin:0 8px;font-size:13px">or</span>
+        <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/issues" target="_blank" class="help-link">
+          Post to Issues <small style="opacity:.6">(simple upload)</small>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
