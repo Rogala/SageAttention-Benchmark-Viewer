@@ -1,191 +1,614 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SageAttention Benchmark Viewer</title>
-    <style>
-        :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --text: #c9d1d9;
-            --blue: #58a6ff;
-            --green: #3fb950;
-            --border: #30363d;
-        }
-        body { 
-            background-color: var(--bg); 
-            color: var(--text); 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-        }
-        .container { max-width: 1100px; margin: 0 auto; }
-        
-        header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        
-        h1 { color: var(--blue); margin: 0; font-size: 24px; }
-        
-        .panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SageAttention Benchmark Viewer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#0f1117;--bg2:#181c27;--bg3:#1e2336;
+  --border:rgba(255,255,255,0.08);
+  --text:#e8eaf0;--muted:#9aa0b8;--radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:16px;line-height:1.7;width:100%}
 
-        .controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+.header{padding:14px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.header h1{font-size:20px;font-weight:700;flex-shrink:0;color:#fff;letter-spacing:-.3px}
+.header h1 span{color:#5b8af7}
+.slots{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.slot{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1.5px dashed var(--border);
+  border-radius:8px;padding:6px 12px;font-size:13px;transition:border-color .2s}
+.slot.loaded{border-style:solid}
+.slot .sname{font-weight:600}
+.slot .smeta{display:none}
+.slot .sclose{margin-left:8px;opacity:.5;cursor:pointer;font-size:15px;line-height:1}
+.slot .sclose:hover{opacity:1;color:#f05050}
+.add-btn{background:var(--bg2);border:1.5px dashed var(--border);border-radius:8px;
+  padding:6px 14px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .2s}
+.add-btn:hover{border-color:#5b8af7;color:var(--text)}
+input[type=file]{display:none}
+.header-right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.gh-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;
+  font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.gh-btn:hover{opacity:.85}
+.gh-btn-green{background:#238636;color:#fff;border:1px solid #2ea043}
+.gh-btn-blue{background:var(--bg2);color:#58a6ff;border:1px solid #30363d}
 
-        select {
-            background: #21262d;
-            color: var(--text);
-            border: 1px solid var(--border);
-            padding: 10px;
-            border-radius: 6px;
-            min-width: 320px;
-            outline: none;
-            cursor: pointer;
-        }
+.gpu-bar{padding:8px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gpu-bar-info{margin-right:8px;flex-shrink:0}
+.gpu-bar-title{font-size:13px;color:var(--text);font-weight:500}
+.gpu-bar-sub{font-size:11px;color:var(--muted)}
+.gpu-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);
+  padding:4px 10px;border-radius:6px;font-size:13px;cursor:pointer;transition:border-color .15s}
+.gpu-select:hover{border-color:#5b8af7}
+.gpu-select:focus{outline:none;border-color:#5b8af7}
 
-        .status-badge {
-            font-size: 12px;
-            padding: 4px 12px;
-            border-radius: 12px;
-            background: #238636;
-            color: white;
-        }
+/* sort controls + legend merged */
+.controls{display:flex;gap:12px;padding:8px 24px;border-bottom:1px solid var(--border);align-items:center;flex-wrap:wrap}
+.controls label{font-size:13px;color:var(--muted)}
+.controls select{background:var(--bg2);border:1px solid var(--border);color:var(--text);
+  padding:4px 10px;border-radius:6px;font-size:13px}
+.toggle-btn{background:var(--bg2);border:1px solid var(--border);border-radius:6px;
+  padding:4px 12px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s}
+.toggle-btn.active{border-color:#5b8af7;color:#5b8af7}
+.controls-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--muted);white-space:nowrap}
+.dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
 
-        .data-display {
-            background: #010409;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 15px;
-            overflow-x: auto;
-            color: #7ee787;
-            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
-            font-size: 14px;
-        }
+.nav{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--border);overflow-x:auto}
+.nav-btn{padding:12px 18px;font-size:15px;color:var(--muted);cursor:pointer;
+  border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;font-weight:500}
+.nav-btn:hover{color:#c8ccdc}
+.nav-btn.active{color:#ffffff;border-bottom-color:#5b8af7;font-weight:600}
 
-        .info-text { color: #8b949e; font-size: 14px; margin-top: 10px; }
-        
-        a { color: var(--blue); text-decoration: none; }
-        a:hover { text-decoration: underline; }
-    </style>
+.content{padding:24px;width:100%}
+.model-section{display:none}
+.model-section.active{display:block}
+
+.file-block{margin-bottom:28px}
+.file-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.file-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:600}
+.file-detail{font-size:14px;color:var(--muted)}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:12px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.card-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+.divider{border:none;border-top:1px solid var(--border);margin:8px 0 22px}
+
+.table-wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--bg3);color:var(--muted);padding:8px 12px;text-align:left;
+   font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap;font-size:13px}
+td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+.notice{padding:60px 24px;text-align:center;color:var(--muted);font-size:16px}
+.notice code{background:var(--bg2);padding:3px 8px;border-radius:4px;color:var(--text)}
+</style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>🚀 SageAttention Benchmark Viewer</h1>
-        <nav style="display: flex; gap: 10px; flex-wrap: wrap;">
-			<a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/upload/main/results" 
-			   target="_blank" 
-			   style="background: #238636; color: white; padding: 10px 20px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 14px;">
-			   + Submit via GitHub (Account required)
-			</a>
+<div class="header">
+  <h1><span>Sage</span>Attention Benchmark Viewer</h1>
+  <div class="slots" id="slots"></div>
+  <div class="add-btn" id="addBtn" onclick="addSlot()">+ Add file</div>
+  <input type="file" id="fileIn" accept=".json" onchange="onFileChosen(this)">
+  <div class="header-right">
+    <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/upload/main/results"
+       target="_blank" class="gh-btn gh-btn-green">+ Submit via GitHub <small style="opacity:.75;font-weight:400">(Account required)</small></a>
+    <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/issues"
+       target="_blank" class="gh-btn gh-btn-blue">+ Submit via Issues <small style="opacity:.75;font-weight:400">(Simple upload)</small></a>
+  </div>
+</div>
 
-			<a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/issues" 
-			   target="_blank" 
-			   style="background: #21262d; color: #58a6ff; border: 1px solid #30363d; padding: 10px 20px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 14px;">
-			   + Submit via Issues (Simple upload)
-			</a>
-		</nav>
-    </header>
+<div class="gpu-bar">
+  <div class="gpu-bar-info">
+    <div class="gpu-bar-title">Select results from Community Database:</div>
+    <div class="gpu-bar-sub">Fetching data directly from the /results directory of this repository.</div>
+  </div>
+  <select class="gpu-select" id="gpuDataCenter"   onchange="onGpuSelect(this)"><option value="">Data Center</option></select>
+  <select class="gpu-select" id="gpuWorkstation"  onchange="onGpuSelect(this)"><option value="">Workstation</option></select>
+  <select class="gpu-select" id="gpuBlackwell"    onchange="onGpuSelect(this)"><option value="">RTX 5xxx Blackwell</option></select>
+  <select class="gpu-select" id="gpuAda"          onchange="onGpuSelect(this)"><option value="">RTX 4xxx Ada</option></select>
+  <select class="gpu-select" id="gpuAmpere"       onchange="onGpuSelect(this)"><option value="">RTX 3xxx Ampere</option></select>
+  <select class="gpu-select" id="gpuTuring"       onchange="onGpuSelect(this)"><option value="">RTX 2xxx-16xx Turing</option></select>
+</div>
 
-    <div class="panel">
-        <h3>Select results from Community Database:</h3>
-        <div class="controls">
-            <select id="gpu-selector">
-                <option value="">Loading community database...</option>
-            </select>
-            <span id="counter" class="status-badge">Connecting...</span>
-        </div>
-        <p class="info-text">Fetching data directly from the /results directory of this repository.</p>
-    </div>
+<div class="controls">
+  <label>Sort by:</label>
+  <select id="sortBy" onchange="renderAll()">
+    <option value="none">original order</option>
+    <option value="speedup">speedup SA2 vs SDPA</option>
+    <option value="latency_sa2">SA2 latency</option>
+    <option value="latency_sdpa">SDPA latency</option>
+  </select>
+  <label>Show range:</label>
+  <select id="showRange" onchange="renderAll()">
+    <option value="median">median only</option>
+    <option value="minmax">min/max range</option>
+  </select>
+  <span id="toggleSA2" class="toggle-btn active" onclick="toggleKernel('sa2')">SA2</span>
+  <span id="toggleSA2fp8" class="toggle-btn active" onclick="toggleKernel('sa2_fp8')">SA2 fp8</span>
+  <span id="toggleSA3" class="toggle-btn active" onclick="toggleKernel('sa3')">SA3</span>
+  <span id="toggleSDPA" class="toggle-btn active" onclick="toggleKernel('sdpa')">SDPA</span>
+  <div class="controls-right">
+    <span class="legend-item"><span class="dot" style="background:#5b8af7"></span>SA2 auto</span>
+    <span class="legend-item"><span class="dot" style="background:#a78bfa"></span>SA2 fp8</span>
+    <span class="legend-item"><span class="dot" style="background:#3dd68c"></span>SA3 FP4</span>
+    <span class="legend-item"><span class="dot" style="background:#f5a623"></span>SDPA</span>
+  </div>
+</div>
 
-    <div class="panel">
-        <h3>Benchmark Raw Data:</h3>
-        <div id="display-area">
-            <pre id="json-output" class="data-display">Please select a GPU model from the list above to view benchmark details...</pre>
-        </div>
-    </div>
+<div class="nav" id="nav"></div>
+<div class="content" id="content">
+  <div class="notice">⏳ Loading reference benchmark…</div>
 </div>
 
 <script>
-    // GitHub API Configuration
-    const CONFIG = {
-        user: "Rogala",
-        repo: "SageAttention-Benchmark-Viewer",
-        folder: "results"
-    };
+const FILE_COLORS = ['#5b8af7','#3dd68c','#f5a623','#a78bfa','#f05050'];
+const ALL_KERNELS = [
+  {key:'sa2',     label:'SA2 auto',  color:'#5b8af7'},
+  {key:'sa2_fp8', label:'SA2 fp8',   color:'#a78bfa'},
+  {key:'sa3',     label:'SA3 FP4',   color:'#3dd68c'},
+  {key:'sdpa',    label:'SDPA',      color:'#f5a623'},
+];
 
-    const selector = document.getElementById('gpu-selector');
-    const counter = document.getElementById('counter');
-    const output = document.getElementById('json-output');
+let files=[], models=[], activeTab=0, chartReg={};
+let hiddenKernels = new Set();
 
-    async function loadCommunityData() {
-        const url = `https://api.github.com/repos/${CONFIG.user}/${CONFIG.repo}/contents/${CONFIG.folder}`;
-        
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('API Error');
-            
-            const files = await response.json();
-            // Filter JSON files, excluding technical .gitkeep
-            const jsonFiles = files.filter(f => f.name.endsWith('.json') && !f.name.startsWith('.'));
-            
-            selector.innerHTML = '<option value="">-- Choose a GPU Model (e.g. RTX 5060 Ti) --</option>';
-            
-            jsonFiles.forEach(file => {
-                const option = document.createElement('option');
-                option.value = file.download_url;
-                // Beautify filename: NVIDIA_RTX_5060_Ti -> NVIDIA RTX 5060 Ti
-                option.textContent = file.name.replace('.json', '').replace(/_/g, ' ');
-                selector.appendChild(option);
-            });
+// ── GitHub config ────────────────────────────────────────────────
+const GH = {
+  user:   'Rogala',
+  repo:   'SageAttention-Benchmark-Viewer',
+  folder: 'results',
+  ref:    'RTX-5060_Ti-16GB_Ref.json',
+};
+const GH_RAW  = `https://raw.githubusercontent.com/${GH.user}/${GH.repo}/main/${GH.folder}`;
+const GH_API  = `https://api.github.com/repos/${GH.user}/${GH.repo}/contents/${GH.folder}`;
 
-            counter.textContent = `Models found: ${jsonFiles.length}`;
+// Maps select element id → regex that matches GPU filenames for that category
+const GPU_GROUPS = {
+  gpuDataCenter:  /^(H100|A100|A40|L40|V100|P100)/i,
+  gpuWorkstation: /^RTX[-_\s]?(6000|5000|4500|4000|A6000|A5000|A4000)/i,
+  gpuBlackwell:   /^RTX[-_\s]?50/i,
+  gpuAda:         /^RTX[-_\s]?40/i,
+  gpuAmpere:      /^RTX[-_\s]?30/i,
+  gpuTuring:      /^(RTX[-_\s]?20|GTX[-_\s]?16)/i,
+};
 
-        } catch (error) {
-            console.error(error);
-            selector.innerHTML = '<option value="">Database unavailable</option>';
-            counter.style.background = '#da3633';
-            counter.textContent = 'API Connection Error';
-        }
+// All JSON files fetched from GitHub (excluding Ref)
+let ghFiles = [];
+
+// Convert filename like "RTX-5060_Ti-16GB.json" → display label "RTX 5060 Ti 16GB"
+function fileToLabel(name){
+  return name.replace(/\.json$/i,'').replace(/[-_]/g,' ');
+}
+
+// Determine which group select a filename belongs to
+function fileGroup(name){
+  // strip path, get just the GPU part (before first underscore that separates runs)
+  const gpu = name.replace(/\.json$/i,'');
+  for(const [id, re] of Object.entries(GPU_GROUPS)){
+    if(re.test(gpu)) return id;
+  }
+  return null;
+}
+
+// Fill dropdowns with files from GitHub
+function populateDropdowns(fileList){
+  // Reset all to just header option
+  for(const id of Object.keys(GPU_GROUPS)){
+    const sel = document.getElementById(id);
+    sel.innerHTML = sel.options[0].outerHTML; // keep placeholder
+  }
+  fileList.forEach(f => {
+    const gid = fileGroup(f.name);
+    if(!gid) return;
+    const sel = document.getElementById(gid);
+    const opt = document.createElement('option');
+    opt.value = f.download_url;
+    opt.textContent = fileToLabel(f.name);
+    sel.appendChild(opt);
+  });
+}
+
+// Called when user picks a GPU from any dropdown
+async function onGpuSelect(sel){
+  const url = sel.value;
+  if(!url){ sel.selectedIndex=0; return; }
+  // Reset all other dropdowns to placeholder
+  for(const id of Object.keys(GPU_GROUPS)){
+    if(document.getElementById(id) !== sel)
+      document.getElementById(id).selectedIndex = 0;
+  }
+  await loadFromUrl(url, fileToLabel(sel.options[sel.selectedIndex].text));
+  sel.selectedIndex = 0; // reset after load so dropdown shows placeholder again
+}
+
+// Load a JSON from URL and add it as a file slot (max 5, skip duplicates by name)
+async function loadFromUrl(url, label){
+  if(files.length >= 5){ alert('Maximum 5 files loaded at once. Remove one first.'); return; }
+  const dupName = label || url.split('/').pop().replace(/\.json$/i,'');
+  if(files.find(f=>f.name===dupName)) return; // already loaded
+  try{
+    const resp = await fetch(url);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const idx = files.length;
+    files.push({data, name:dupName, color:FILE_COLORS[idx%FILE_COLORS.length], ev:data.env||{}});
+    updateModels(); renderSlots(); renderAll();
+  }catch(e){
+    console.error('Failed to load', url, e);
+    alert(`Could not load file:\n${url}\n\n${e.message}`);
+  }
+}
+
+// Startup: load Ref + populate dropdowns from GitHub API
+async function init(){
+  // 1. Load reference file immediately
+  const refUrl = `${GH_RAW}/${GH.ref}`;
+  const refLabel = GH.ref.replace(/\.json$/i,'');
+  await loadFromUrl(refUrl, refLabel);
+
+  // 2. Fetch file list from GitHub API
+  try{
+    const resp = await fetch(GH_API);
+    if(!resp.ok) throw new Error(`GitHub API ${resp.status}`);
+    const list = await resp.json();
+    ghFiles = list.filter(f => f.name.endsWith('.json') && !f.name.includes('Ref'));
+    populateDropdowns(ghFiles);
+  }catch(e){
+    console.warn('Could not fetch community results list:', e.message);
+  }
+}
+
+init();
+
+function getV(cfg,key,field='median_ms'){
+  const v=cfg[key];
+  return (v && v[field] != null) ? v[field] : null;
+}
+
+function activeKernelList(){
+  return ALL_KERNELS.filter(k=>!hiddenKernels.has(k.key));
+}
+
+function toggleKernel(key){
+  if(hiddenKernels.has(key)) hiddenKernels.delete(key);
+  else hiddenKernels.add(key);
+  const ids = {sa2:'toggleSA2', sa2_fp8:'toggleSA2fp8', sa3:'toggleSA3', sdpa:'toggleSDPA'};
+  document.getElementById(ids[key]).classList.toggle('active');
+  renderAll();
+}
+
+function addSlot(){
+  if(files.length>=5)return;
+  document.getElementById('fileIn').value='';
+  document.getElementById('fileIn').click();
+}
+
+function onFileChosen(inp){
+  const f=inp.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      const idx=files.length;
+      // use actual filename without extension
+      const fname = f.name.replace(/\.json$/i,'');
+      files.push({data, name:fname, color:FILE_COLORS[idx%FILE_COLORS.length], ev:data.env||{}});
+      updateModels(); renderSlots(); renderAll();
+    }catch(ex){alert('JSON error: '+ex);}
+  };
+  r.readAsText(f);
+}
+
+function removeFile(idx){
+  // destroy charts belonging to this file
+  Object.keys(chartReg).forEach(id=>{
+    if(id.startsWith(`lat_`) || id.startsWith(`spd_`)){
+      const parts = id.split('_');
+      if(parts[2]==='f'+idx){ chartReg[id].destroy(); delete chartReg[id]; }
     }
+  });
+  files.splice(idx,1);
+  files.forEach((f,i)=>f.color=FILE_COLORS[i%FILE_COLORS.length]);
+  updateModels(); renderSlots(); renderAll();
+}
 
-    selector.addEventListener('change', async (e) => {
-        if (!e.target.value) return;
-        
-        output.textContent = "Fetching file contents...";
-        
-        try {
-            const res = await fetch(e.target.value);
-            const data = await res.json();
-            
-            // Format JSON for a clean look
-            output.textContent = JSON.stringify(data, null, 4);
-        } catch (err) {
-            output.textContent = "Failed to parse JSON data.";
-        }
+function renderSlots(){
+  const el=document.getElementById('slots');
+  el.innerHTML='';
+  files.forEach((f,i)=>{
+    const div=document.createElement('div');
+    div.className='slot loaded';
+    div.style.borderColor=f.color;
+    div.innerHTML=`
+      <span class="dot" style="background:${f.color}"></span>
+      <span class="sname" style="color:${f.color}">${f.name}</span>
+      <span class="smeta">py${f.ev.python||'?'} · ${f.ev.torch||'?'} · SA2:${f.ev.sageattention||'?'}</span>
+      <span class="sclose" onclick="removeFile(${i});event.stopPropagation()">✕</span>`;
+    el.appendChild(div);
+  });
+  document.getElementById('addBtn').style.display=files.length>=5?'none':'';
+}
+
+function updateModels(){
+  const seen=new Set(); models=[];
+  files.forEach(({data})=>{
+    data.configs.forEach(c=>{
+      const m=c.label.startsWith('[')?c.label.slice(1,c.label.indexOf(']')):'Other';
+      if(!seen.has(m)){seen.add(m);models.push(m);}
+    });
+  });
+}
+
+// pre-index for performance
+function buildModelMap(){
+  const map={};
+  files.forEach((f,fi)=>{
+    f.data.configs.forEach(c=>{
+      const m=c.label.startsWith('[')?c.label.slice(1,c.label.indexOf(']')):'Other';
+      if(!map[m]) map[m]={};
+      if(!map[m][fi]) map[m][fi]=[];
+      map[m][fi].push(c);
+    });
+  });
+  return map;
+}
+
+function sortConfigs(cfgs, sortBy){
+  if(sortBy==='none') return cfgs;
+  return [...cfgs].sort((a,b)=>{
+    if(sortBy==='speedup'){
+      const sa=getV(a,'sdpa'),ak=getV(a,'sa2'),sb=getV(b,'sdpa'),bk=getV(b,'sa2');
+      const ra=sa&&ak?sa/ak:0, rb=sb&&bk?sb/bk:0;
+      return rb-ra;
+    }
+    if(sortBy==='latency_sa2'){
+      return (getV(a,'sa2')||999)-(getV(b,'sa2')||999);
+    }
+    if(sortBy==='latency_sdpa'){
+      return (getV(a,'sdpa')||999)-(getV(b,'sdpa')||999);
+    }
+    return 0;
+  });
+}
+
+function renderAll(){
+  if(!files.length){
+    document.getElementById('nav').innerHTML='';
+    document.getElementById('content').innerHTML='<div class="notice">Click <strong>+ Add file</strong> to load <code>models.json</code></div>';
+    return;
+  }
+
+  // destroy all charts cleanly
+  Object.values(chartReg).forEach(ch=>ch.destroy());
+  chartReg={};
+
+  const sortBy = document.getElementById('sortBy').value;
+  const modelMap = buildModelMap();
+
+  const nav=document.getElementById('nav');
+  nav.innerHTML='';
+  models.forEach((m,i)=>{
+    const btn=document.createElement('div');
+    btn.className='nav-btn'+(i===activeTab?' active':'');
+    btn.textContent=m;
+    btn.onclick=()=>{activeTab=i;renderAll();};
+    nav.appendChild(btn);
+  });
+
+  const content=document.getElementById('content');
+  content.innerHTML='';
+  const pendingCharts=[];
+
+  models.forEach((model,mi)=>{
+    const sec=document.createElement('div');
+    sec.className='model-section'+(mi===activeTab?' active':'');
+
+    files.forEach((f,fi)=>{
+      const cfgsRaw=(modelMap[model]&&modelMap[model][fi])||[];
+      if(!cfgsRaw.length) return;
+      const cfgs=sortConfigs(cfgsRaw, sortBy);
+      const shortLabels=cfgs.map(c=>c.label.replace(/^\[[^\]]+\]\s*/,''));
+      const h=Math.max(160, shortLabels.length*44+60);
+
+      // stable IDs — no Date.now()
+      const latId=`lat_${mi}_f${fi}`;
+      const spdId=`spd_${mi}_f${fi}`;
+
+      const ev=f.ev;
+      const block=document.createElement('div');
+      block.className='file-block';
+      block.innerHTML=`
+        <div class="file-header">
+          <span class="file-badge" style="background:${f.color}28;color:${f.color}">${f.name}</span>
+          <span class="file-detail">py${ev.python||'?'} · torch ${ev.torch||'?'} · triton ${ev.triton||'?'} · SA2 ${ev.sageattention||'?'} · SA3 ${ev.sageattn3||'?'}</span>
+        </div>
+        <div class="charts-row">
+          <div class="card">
+            <div class="card-title">Latency (ms, lower is better)</div>
+            <div style="position:relative;height:${h}px"><canvas id="${latId}"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Speedup vs SDPA (higher is better)</div>
+            <div style="position:relative;height:${h}px"><canvas id="${spdId}"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Detail table</div>
+          <div class="table-wrap" id="tbl_${mi}_f${fi}"></div>
+        </div>
+        <hr class="divider">`;
+      sec.appendChild(block);
+      // use setTimeout to ensure canvas is in DOM before Chart.js init
+      ;(function(lid,sid,tid,c,sl){
+        setTimeout(()=>{
+          buildLatency(lid,c,sl);
+          buildSpeedup(sid,c,sl);
+          buildTable(tid,c,sl);
+        },0);
+      })(latId,spdId,`tbl_${mi}_f${fi}`,cfgs,shortLabels);
     });
 
-    // Initialize on page load
-    loadCommunityData();
-</script>
+    content.appendChild(sec);
+  });
+}
 
+const gOpts={
+  indexAxis:'y', responsive:true, maintainAspectRatio:false,
+  plugins:{legend:{display:false}},
+  scales:{
+    x:{ticks:{color:'#9aa0b8',font:{size:13}}, grid:{color:'rgba(255,255,255,.06)'}},
+    y:{ticks:{color:'#e8eaf0',font:{size:13}}, grid:{color:'rgba(255,255,255,.03)'}},
+  }
+};
+
+function buildLatency(id, cfgs, labels){
+  const showRange = document.getElementById('showRange').value === 'minmax';
+  const kernels = activeKernelList();
+
+  const datasets = [];
+  kernels.forEach(({key,label,color})=>{
+    const data = cfgs.map(c=>getV(c,key));
+    if(!data.some(v=>v!==null)) return;
+
+    // median bars
+    datasets.push({
+      label, data: data.map(v=>v??null),
+      backgroundColor: color+'99', borderColor: color, borderWidth:1, skipNull:true,
+    });
+
+    // min/max range as transparent floating bars — no plugin needed
+    if(showRange){
+      const rangeData = cfgs.map(c=>{
+        const mn=getV(c,key,'min_ms'), mx=getV(c,key,'max_ms');
+        return (mn!=null && mx!=null) ? [mn,mx] : null;
+      });
+      if(rangeData.some(v=>v!==null)){
+        datasets.push({
+          label: label+' range',
+          data: rangeData,
+          backgroundColor: color+'30', borderColor: color+'70',
+          borderWidth:1, borderSkipped:false, skipNull:true,
+        });
+      }
+    }
+  });
+
+  const opts=JSON.parse(JSON.stringify(gOpts));
+  opts.scales.x.ticks.callback=v=>v!=null?v.toFixed(2)+'ms':'';
+  opts.scales.x.min=0;
+
+  if(chartReg[id]) chartReg[id].destroy();
+  chartReg[id]=new Chart(document.getElementById(id),{
+    type:'bar', data:{labels, datasets}, options:opts
+  });
+}
+
+function buildSpeedup(id, cfgs, labels){
+  const kernels = activeKernelList().filter(k=>k.key!=='sdpa');
+
+  const datasets = kernels.map(({key,label,color})=>{
+    const data = cfgs.map(c=>{
+      const s=getV(c,'sdpa'), k=getV(c,key);
+      if(!s || !k || k===0) return null;
+      return parseFloat((s/k).toFixed(2));
+    });
+    if(!data.some(v=>v!==null)) return null;
+    return {
+      label, data,
+      backgroundColor: color+'99',
+      borderColor: color,
+      borderWidth: 1,
+    };
+  }).filter(Boolean);
+
+  const opts=JSON.parse(JSON.stringify(gOpts));
+  opts.scales.x.ticks.callback=v=>v!=null?v.toFixed(1)+'x':'';
+  opts.scales.x.min=0;
+
+  if(chartReg[id]) chartReg[id].destroy();
+  chartReg[id]=new Chart(document.getElementById(id),{
+    type:'bar', data:{labels, datasets}, options:opts
+  });
+}
+
+function buildTable(id, cfgs, labels){
+  const kernels = activeKernelList();
+  const showRange = document.getElementById('showRange').value === 'minmax';
+
+  let html=`<table><thead><tr><th>Config</th>
+    ${kernels.map(c=>`<th style="color:${c.color}">${c.label}</th>`).join('')}
+    <th>SA2 vs SDPA</th><th>Best</th></tr></thead><tbody>`;
+
+  const sumVals = Object.fromEntries(kernels.map(k=>[k.key,[]]));
+  const speedups = [];
+
+  cfgs.forEach((c,i)=>{
+    const sdpaV=getV(c,'sdpa');
+    const vals=kernels.map(({key})=>getV(c,key));
+    const valid=vals.filter(v=>v!==null);
+    const minV=valid.length?Math.min(...valid):null;
+
+    html+=`<tr><td>${labels[i]}</td>`;
+    vals.forEach((v,ci)=>{
+      const best=v!==null&&v===minV;
+      const style=best?`style="color:${kernels[ci].color};font-weight:600"`:'';
+      let cell='—';
+      if(v!==null){
+        cell=v.toFixed(3)+' ms';
+        if(showRange){
+          const mn=getV(c,kernels[ci].key,'min_ms');
+          const mx=getV(c,kernels[ci].key,'max_ms');
+          if(mn!=null&&mx!=null)
+            cell+=`<br><small style="color:var(--muted);font-size:11px">${mn.toFixed(3)}–${mx.toFixed(3)}</small>`;
+        }
+        sumVals[kernels[ci].key].push(v);
+      }
+      html+=`<td ${style}>${cell}</td>`;
+    });
+
+    const sa2v=getV(c,'sa2');
+    let spTxt='—';
+    if(sdpaV&&sa2v&&sa2v>0){
+      const sp=sdpaV/sa2v;
+      spTxt=`<span style="color:${sp>=1?'#3dd68c':'#f05050'};font-weight:600">${sp.toFixed(2)}x</span>`;
+      speedups.push(sp);
+    }
+    html+=`<td>${spTxt}</td>`;
+
+    const bi=vals.indexOf(minV);
+    const bl=bi>=0?kernels[bi].label:'—';
+    const bc=bi>=0?kernels[bi].color:'var(--muted)';
+    html+=`<td style="color:${bc};font-size:13px">${bl}</td></tr>`;
+  });
+
+  // summary row — only when more than 1 config
+  if(cfgs.length > 1){
+    const summaryVals = kernels.map(({key})=>{
+      const arr=sumVals[key];
+      return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null;
+    });
+    const summaryMin = Math.min(...summaryVals.filter(v=>v!==null));
+    html += `<tr style="border-top:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04)">
+      <td style="font-weight:600;color:var(--muted);font-size:12px">avg (${cfgs.length})</td>`;
+    summaryVals.forEach((avg,ci)=>{
+      const best = avg!==null && avg===summaryMin;
+      const s = best ? `style="color:${kernels[ci].color};font-weight:700"` : `style="color:var(--muted)"`;
+      html += `<td ${s}>${avg!==null ? avg.toFixed(3)+' ms' : '—'}</td>`;
+    });
+    const avgSp = speedups.length ? speedups.reduce((a,b)=>a+b,0)/speedups.length : null;
+    html += `<td style="font-weight:600">${avgSp!==null ? `<span style="color:${avgSp>=1?'#3dd68c':'#f05050'}">${avgSp.toFixed(2)}x</span>` : '—'}</td>`;
+    html += `<td></td></tr>`;
+  }
+
+  html+='</tbody></table>';
+  const el=document.getElementById(id);
+  if(el) el.innerHTML=html;
+}
+</script>
 </body>
 </html>
