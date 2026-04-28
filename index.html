@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,8 +55,9 @@
             border: 1px solid var(--border);
             padding: 10px;
             border-radius: 6px;
-            min-width: 300px;
+            min-width: 320px;
             outline: none;
+            cursor: pointer;
         }
 
         .status-badge {
@@ -90,31 +91,31 @@
     <header>
         <h1>🚀 SageAttention Benchmark Viewer</h1>
         <nav>
-            <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer" target="_blank">GitHub Repository</a>
+            <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer" target="_blank">View on GitHub</a>
         </nav>
     </header>
 
     <div class="panel">
-        <h3>Оберіть результати з бази:</h3>
+        <h3>Select results from Community Database:</h3>
         <div class="controls">
             <select id="gpu-selector">
-                <option value="">Завантаження бази даних спільноти...</option>
+                <option value="">Loading community database...</option>
             </select>
-            <span id="counter" class="status-badge">Завантаження...</span>
+            <span id="counter" class="status-badge">Connecting...</span>
         </div>
-        <p class="info-text">Тут відображаються файли з папки /results вашого репозиторію.</p>
+        <p class="info-text">Fetching data directly from the /results directory of this repository.</p>
     </div>
 
     <div class="panel">
-        <h3>Дані бенчмарку:</h3>
+        <h3>Benchmark Raw Data:</h3>
         <div id="display-area">
-            <pre id="json-output" class="data-display">Оберіть модель відеокарти вище, щоб побачити деталі тесту...</pre>
+            <pre id="json-output" class="data-display">Please select a GPU model from the list above to view benchmark details...</pre>
         </div>
     </div>
 </div>
 
 <script>
-    // Налаштування GitHub API
+    // GitHub API Configuration
     const CONFIG = {
         user: "Rogala",
         repo: "SageAttention-Benchmark-Viewer",
@@ -130,48 +131,49 @@
         
         try {
             const response = await fetch(url);
-            if (!response.ok) throw new Error('Помилка API');
+            if (!response.ok) throw new Error('API Error');
             
             const files = await response.json();
-            const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+            // Filter JSON files, excluding technical .gitkeep
+            const jsonFiles = files.filter(f => f.name.endsWith('.json') && !f.name.startsWith('.'));
             
-            selector.innerHTML = '<option value="">-- Оберіть відеокарту (напр. RTX 5060 Ti) --</option>';
+            selector.innerHTML = '<option value="">-- Choose a GPU Model (e.g. RTX 5060 Ti) --</option>';
             
             jsonFiles.forEach(file => {
                 const option = document.createElement('option');
                 option.value = file.download_url;
-                // Робимо назву красивою для списку
+                // Beautify filename: NVIDIA_RTX_5060_Ti -> NVIDIA RTX 5060 Ti
                 option.textContent = file.name.replace('.json', '').replace(/_/g, ' ');
                 selector.appendChild(option);
             });
 
-            counter.textContent = `Доступно моделей: ${jsonFiles.length}`;
+            counter.textContent = `Models found: ${jsonFiles.length}`;
 
         } catch (error) {
             console.error(error);
-            selector.innerHTML = '<option value="">Помилка завантаження бази</option>';
+            selector.innerHTML = '<option value="">Database unavailable</option>';
             counter.style.background = '#da3633';
-            counter.textContent = 'Помилка API';
+            counter.textContent = 'API Connection Error';
         }
     }
 
     selector.addEventListener('change', async (e) => {
         if (!e.target.value) return;
         
-        output.textContent = "Завантаження даних файлу...";
+        output.textContent = "Fetching file contents...";
         
         try {
             const res = await fetch(e.target.value);
             const data = await res.json();
             
-            // Форматуємо JSON для гарного вигляду
+            // Format JSON for a clean look
             output.textContent = JSON.stringify(data, null, 4);
         } catch (err) {
-            output.textContent = "Не вдалося прочитати вміст файлу.";
+            output.textContent = "Failed to parse JSON data.";
         }
     });
 
-    // Запуск при завантаженні сторінки
+    // Initialize on page load
     loadCommunityData();
 </script>
 
