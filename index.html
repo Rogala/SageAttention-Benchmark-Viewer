@@ -343,7 +343,14 @@ async function init(){
 
 init();
 
-window.addEventListener('resize', ()=>{ clearTimeout(window._rt); window._rt=setTimeout(renderAll, 200); });
+let _lastWidth = window.innerWidth;
+window.addEventListener('resize', ()=>{
+  const w = window.innerWidth;
+  if(w === _lastWidth) return; // ignore height-only changes (mobile keyboard/scrollbar)
+  _lastWidth = w;
+  clearTimeout(window._rt);
+  window._rt = setTimeout(renderAll, 200);
+});
 
 // ── Helpers ───────────────────────────────────────────────────
 function getV(cfg,key,field='median_ms'){
