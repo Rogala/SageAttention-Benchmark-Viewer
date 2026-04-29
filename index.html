@@ -456,18 +456,33 @@ function switchTab(i){
   });
 }
 
-function sortConfigs(cfgs,sortBy){
-  if(sortBy==='none') return cfgs;
-  return [...cfgs].sort((a,b)=>{
-    if(sortBy==='speedup'){
-      const ra=(getV(a,'sdpa')&&getV(a,'sa2'))?getV(a,'sdpa')/getV(a,'sa2'):0;
-      const rb=(getV(b,'sdpa')&&getV(b,'sa2'))?getV(b,'sdpa')/getV(b,'sa2'):0;
-      return rb-ra;
-    }
-    if(sortBy==='latency_sa2') return (getV(a,'sa2')||999)-(getV(b,'sa2')||999);
-    if(sortBy==='latency_sdpa') return (getV(a,'sdpa')||999)-(getV(b,'sdpa')||999);
-    return 0;
-  });
+// cfgKeys: унікальні label-ключі конфігів для цієї моделі (з першого файлу що має їх)
+// modelMap: {model: {fi: [cfg,...]}}
+function sortConfigKeys(labelKeys, model, modelMap, sortBy){
+  if(sortBy==='none') return labelKeys;
+
+  // для кожного label-ключа рахуємо середнє по всіх файлах
+  const score = key => {
+    let sum=0, count=0;
+    files.forEach((_,fi)=>{
+      const cfgs=(modelMap[model]&&modelMap[model][fi])||[];
+      const c=cfgs.find(c=>c.label===key);
+      if(!c) return;
+      if(sortBy==='speedup'){
+        const s=getV(c,'sdpa'), a=getV(c,'sa2');
+        if(s&&a&&a>0){ sum+=s/a; count++; }
+      } else if(sortBy==='latency_sa2'){
+        const v=getV(c,'sa2'); if(v!=null){ sum+=v; count++; }
+      } else if(sortBy==='latency_sdpa'){
+        const v=getV(c,'sdpa'); if(v!=null){ sum+=v; count++; }
+      }
+    });
+    return count ? sum/count : (sortBy==='speedup' ? 0 : 999);
+  };
+
+  return [...labelKeys].sort((a,b)=>
+    sortBy==='speedup' ? score(b)-score(a) : score(a)-score(b)
+  );
 }
 
 // ── Render ────────────────────────────────────────────────────
@@ -500,10 +515,22 @@ function renderAll(){
     const sec=document.createElement('div');
     sec.className='model-section'+(mi===activeTab?' active':'');
 
+    // збираємо всі унікальні label-ключі для цієї моделі з усіх файлів
+    const allKeys=[];
+    const seen=new Set();
+    files.forEach((_,fi)=>{
+      ((modelMap[model]&&modelMap[model][fi])||[]).forEach(c=>{
+        if(!seen.has(c.label)){seen.add(c.label);allKeys.push(c.label);}
+      });
+    });
+    const sortedKeys=sortConfigKeys(allKeys, model, modelMap, sortBy);
+
     files.forEach((f,fi)=>{
       const cfgsRaw=(modelMap[model]&&modelMap[model][fi])||[];
       if(!cfgsRaw.length) return;
-      const cfgs=sortConfigs(cfgsRaw,sortBy);
+      // впорядковуємо конфіги цього файлу по sortedKeys
+      const cfgMap=Object.fromEntries(cfgsRaw.map(c=>[c.label,c]));
+      const cfgs=sortedKeys.map(k=>cfgMap[k]).filter(Boolean);
       const shortLabels=cfgs.map(c=>c.label.replace(/^\[[^\]]+\]\s*/,''));
       const isMobile=window.innerWidth<=600;
       // horizontal bars: height per row; vertical bars: fixed height
@@ -595,10 +622,10 @@ function buildLatency(id,cfgs,labels){
   opts.indexAxis = isMobile ? 'x' : 'y';
   opts.scales.x.ticks.callback = isMobile
     ? v=>v!=null?v.toFixed(1)+'ms':''
-    : v=>v!=null?v.toFixed(2)+'ms':'';
+    : v=>v!=null?v.toFixed(1)+'ms':'';
   opts.scales.x.min=0;
   if(isMobile){
-    opts.scales.y.ticks.callback=v=>v!=null?v.toFixed(2)+'ms':'';
+    opts.scales.y.ticks.callback=v=>v!=null?v.toFixed(1)+'ms':'';
     opts.scales.x.ticks.maxRotation=45;
     opts.scales.x.ticks.font={size:10};
     opts.scales.y.ticks.font={size:11};
@@ -613,7 +640,7 @@ function buildSpeedup(id,cfgs,labels){
   const datasets=kernels.map(({key,label,color})=>{
     const data=cfgs.map(c=>{
       const s=getV(c,'sdpa'),k=getV(c,key);
-      return (!s||!k||k===0)?null:parseFloat((s/k).toFixed(2));
+      return (!s||!k||k===0)?null:parseFloat((s/k).toFixed(1));
     });
     if(!data.some(v=>v!==null)) return null;
     return {label,data,backgroundColor:color+'99',borderColor:color,borderWidth:1};
@@ -678,11 +705,11 @@ function buildTable(id,cfgs,labels){
         const style=best?`style="color:${color};font-weight:600"`:'';
         let cell='&mdash;';
         if(v!==null){
-          cell=v.toFixed(3);
+          cell=v.toFixed(1);
           if(showRange){
             const mn=getV(cfgs[rows.indexOf(r)],key,'min_ms'),mx=getV(cfgs[rows.indexOf(r)],key,'max_ms');
             if(mn!=null&&mx!=null)
-              cell+=`<br><small style="color:var(--muted);font-size:10px">${mn.toFixed(2)}&ndash;${mx.toFixed(2)}</small>`;
+              cell+=`<br><small style="color:var(--muted);font-size:10px">${mn.toFixed(1)}&ndash;${mx.toFixed(1)}</small>`;
           }
         }
         html+=`<td ${style}>${cell}</td>`;
@@ -690,7 +717,7 @@ function buildTable(id,cfgs,labels){
       if(rows.length>1){
         const avg=sv[ci];
         const best=avg!==null&&avg===sm;
-        html+=`<td ${best?`style="color:${color};font-weight:700"`:`style="color:var(--muted)"`}>${avg!==null?avg.toFixed(3):'&mdash;'}</td>`;
+        html+=`<td ${best?`style="color:${color};font-weight:700"`:`style="color:var(--muted)"`}>${avg!==null?avg.toFixed(1):'&mdash;'}</td>`;
       }
       html+=`</tr>`;
     });
@@ -700,12 +727,12 @@ function buildTable(id,cfgs,labels){
       <td style="color:var(--muted);font-size:12px;font-weight:600">SA2 vs SDPA</td>`;
     rows.forEach(r=>{
       const spTxt=r.sp!==null
-        ?`<span style="color:${r.sp>=1?'#3dd68c':'#f05050'};font-weight:600">${r.sp.toFixed(2)}x</span>`
+        ?`<span style="color:${r.sp>=1?'#3dd68c':'#f05050'};font-weight:600">${r.sp.toFixed(1)}x</span>`
         :'&mdash;';
       html+=`<td>${spTxt}</td>`;
     });
     if(rows.length>1){
-      html+=`<td>${avgSp!==null?`<span style="color:${avgSp>=1?'#3dd68c':'#f05050'};font-weight:600">${avgSp.toFixed(2)}x</span>`:'&mdash;'}</td>`;
+      html+=`<td>${avgSp!==null?`<span style="color:${avgSp>=1?'#3dd68c':'#f05050'};font-weight:600">${avgSp.toFixed(1)}x</span>`:'&mdash;'}</td>`;
     }
     html+=`</tr>`;
 
@@ -722,17 +749,17 @@ function buildTable(id,cfgs,labels){
         const style=best?`style="color:${kernels[ci].color};font-weight:600"`:'';
         let cell='&mdash;';
         if(v!==null){
-          cell=v.toFixed(3)+' ms';
+          cell=v.toFixed(1)+' ms';
           if(showRange){
             const mn=getV(cfgs[i],kernels[ci].key,'min_ms'),mx=getV(cfgs[i],kernels[ci].key,'max_ms');
             if(mn!=null&&mx!=null)
-              cell+=`<br><small style="color:var(--muted);font-size:11px">${mn.toFixed(3)}&ndash;${mx.toFixed(3)}</small>`;
+              cell+=`<br><small style="color:var(--muted);font-size:11px">${mn.toFixed(1)}&ndash;${mx.toFixed(1)}</small>`;
           }
         }
         html+=`<td ${style}>${cell}</td>`;
       });
       const spTxt=r.sp!==null
-        ?`<span style="color:${r.sp>=1?'#3dd68c':'#f05050'};font-weight:600">${r.sp.toFixed(2)}x</span>`
+        ?`<span style="color:${r.sp>=1?'#3dd68c':'#f05050'};font-weight:600">${r.sp.toFixed(1)}x</span>`
         :'&mdash;';
       html+=`<td>${spTxt}</td>`;
       const bi=r.vals.indexOf(r.minV);
@@ -748,9 +775,9 @@ function buildTable(id,cfgs,labels){
         <td style="font-weight:600;color:var(--muted);font-size:12px">avg (${cfgs.length})</td>`;
       sv.forEach((avg,ci)=>{
         const best=avg!==null&&avg===sm;
-        html+=`<td ${best?`style="color:${kernels[ci].color};font-weight:700"`:`style="color:var(--muted)"`}>${avg!==null?avg.toFixed(3)+' ms':'&mdash;'}</td>`;
+        html+=`<td ${best?`style="color:${kernels[ci].color};font-weight:700"`:`style="color:var(--muted)"`}>${avg!==null?avg.toFixed(1)+' ms':'&mdash;'}</td>`;
       });
-      html+=`<td>${avgSp!==null?`<span style="color:${avgSp>=1?'#3dd68c':'#f05050'};font-weight:600">${avgSp.toFixed(2)}x</span>`:'&mdash;'}</td><td></td></tr>`;
+      html+=`<td>${avgSp!==null?`<span style="color:${avgSp>=1?'#3dd68c':'#f05050'};font-weight:600">${avgSp.toFixed(1)}x</span>`:'&mdash;'}</td><td></td></tr>`;
     }
   }
 
