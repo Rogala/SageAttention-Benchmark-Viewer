@@ -65,7 +65,8 @@ input[type=file]{display:none}
 .dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
 
 /* ── Nav tabs ── */
-.nav{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--border);overflow-x:auto}
+.nav{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--border);overflow-x:auto;
+  position:sticky;top:0;z-index:100;background:var(--bg)}
 .nav-btn{padding:12px 18px;font-size:15px;color:var(--muted);cursor:pointer;
   border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;font-weight:500}
 .nav-btn:hover{color:#c8ccdc}
@@ -437,6 +438,24 @@ function buildModelMap(){
   return map;
 }
 
+function switchTab(i){
+  activeTab=i;
+  document.querySelectorAll('.nav-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.querySelectorAll('.model-section').forEach((sec,j)=>{
+    sec.classList.toggle('active',j===i);
+    // lazy build charts for this section if not yet built
+    if(j===i && sec.dataset.pending){
+      delete sec.dataset.pending;
+      sec.querySelectorAll('.file-block[data-lat]').forEach(block=>{
+        const cfgs=JSON.parse(block.dataset.cfgs);
+        const sl=JSON.parse(block.dataset.labels);
+        const lid=block.dataset.lat, sid=block.dataset.spd, tid=block.dataset.tid;
+        setTimeout(()=>{ buildLatency(lid,cfgs,sl); buildSpeedup(sid,cfgs,sl); buildTable(tid,cfgs,sl); },0);
+      });
+    }
+  });
+}
+
 function sortConfigs(cfgs,sortBy){
   if(sortBy==='none') return cfgs;
   return [...cfgs].sort((a,b)=>{
@@ -470,7 +489,7 @@ function renderAll(){
     const btn=document.createElement('div');
     btn.className='nav-btn'+(i===activeTab?' active':'');
     btn.textContent=m;
-    btn.onclick=()=>{activeTab=i;renderAll();};
+    btn.onclick=()=>switchTab(i);
     nav.appendChild(btn);
   });
 
@@ -521,13 +540,18 @@ function renderAll(){
         <hr class="divider">`;
       sec.appendChild(block);
 
-      ;(function(lid,sid,tid,c,sl){
-        setTimeout(()=>{
-          buildLatency(lid,c,sl);
-          buildSpeedup(sid,c,sl);
-          buildTable(tid,c,sl);
-        },0);
-      })(latId,spdId,tblId,cfgs,shortLabels);
+      if(mi===activeTab){
+        ;(function(lid,sid,tid,c,sl){
+          setTimeout(()=>{ buildLatency(lid,c,sl); buildSpeedup(sid,c,sl); buildTable(tid,c,sl); },0);
+        })(latId,spdId,tblId,cfgs,shortLabels);
+      } else {
+        // mark as pending — will be built on first switchTab
+        sec.dataset.pending='1';
+        block.dataset.lat=latId; block.dataset.spd=spdId;
+        block.dataset.tid=tblId;
+        block.dataset.cfgs=JSON.stringify(cfgs);
+        block.dataset.labels=JSON.stringify(shortLabels);
+      }
     });
 
     content.appendChild(sec);
