@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SageAttention Benchmark Viewer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
 :root{
   --bg:#0f1117;--bg2:#181c27;--bg3:#1e2336;
@@ -19,27 +20,21 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .header h1{font-size:20px;font-weight:700;flex-shrink:0;color:#fff;letter-spacing:-.3px}
 .header h1 span{color:#5b8af7}
 .slots{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.slot{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1.5px solid var(--border);
-  border-radius:8px;padding:6px 12px;font-size:13px}
+.slot{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px}
 .slot .sname{font-weight:600}
-.slot .smeta{display:none}
 .slot .sclose{margin-left:8px;opacity:.5;cursor:pointer;font-size:15px;line-height:1}
 .slot .sclose:hover{opacity:1;color:#f05050}
-.add-btn{background:var(--bg2);border:1.5px dashed var(--border);border-radius:8px;
-  padding:6px 14px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .2s}
+.add-btn{background:var(--bg2);border:1.5px dashed var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .2s}
 .add-btn:hover{border-color:#5b8af7;color:var(--text)}
 input[type=file]{display:none}
 .header-right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.gh-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;
-  font-size:13px;font-weight:600;text-decoration:none;transition:opacity .15s;white-space:nowrap}
+.gh-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;transition:opacity .15s;white-space:nowrap}
 .gh-btn:hover{opacity:.85}
 .gh-btn-green{background:#238636;color:#fff;border:1px solid #2ea043}
 .gh-btn-blue{background:var(--bg2);color:#58a6ff;border:1px solid #30363d}
 
 /* ── Help button ── */
-.help-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);
-  background:#5b8af7;color:#fff;font-size:15px;font-weight:700;cursor:pointer;
-  flex-shrink:0;transition:all .15s;line-height:1;display:flex;align-items:center;justify-content:center}
+.help-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:#5b8af7;color:#fff;font-size:15px;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .15s;line-height:1;display:flex;align-items:center;justify-content:center}
 .help-btn:hover{border-color:#3dd68c;color:#3dd68c;background:#1e2336}
 
 /* ── GPU bar ── */
@@ -47,28 +42,28 @@ input[type=file]{display:none}
 .gpu-bar-info{margin-right:8px;flex-shrink:0}
 .gpu-bar-title{font-size:13px;color:var(--text);font-weight:500}
 .gpu-bar-sub{font-size:11px;color:var(--muted)}
-.gpu-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);
-  padding:4px 10px;border-radius:6px;font-size:13px;cursor:pointer;transition:border-color .15s}
+.gpu-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;font-size:13px;cursor:pointer;transition:border-color .15s;flex:1 1 0;min-width:120px}
 .gpu-select:hover{border-color:#5b8af7}
 .gpu-select:focus{outline:none;border-color:#5b8af7}
 
 /* ── Controls ── */
 .controls{display:flex;gap:12px;padding:8px 24px;border-bottom:1px solid var(--border);align-items:center;flex-wrap:wrap}
 .controls label{font-size:13px;color:var(--muted)}
-.controls select{background:var(--bg2);border:1px solid var(--border);color:var(--text);
-  padding:4px 10px;border-radius:6px;font-size:13px}
-.toggle-btn{background:var(--bg2);border:1px solid var(--border);border-radius:6px;
-  padding:4px 12px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s}
+.controls select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;font-size:13px}
+.toggle-btn{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 16px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s;min-width:80px;text-align:center;white-space:nowrap}
 .toggle-btn.active{border-color:#5b8af7;color:#5b8af7}
 .controls-right{margin-left:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--muted);white-space:nowrap}
 .dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
 
+/* ── Model dropdowns in controls ── */
+.controls-models{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.model-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:13px;cursor:pointer;transition:border-color .15s;min-width:90px}
+.model-select:focus{outline:none;border-color:#5b8af7}
+.controls-model{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 /* ── Nav tabs ── */
-.nav{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--border);overflow-x:auto;
-  position:sticky;top:0;z-index:100;background:var(--bg)}
-.nav-btn{padding:12px 18px;font-size:15px;color:var(--muted);cursor:pointer;
-  border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;font-weight:500}
+.nav{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--border);overflow-x:auto;position:sticky;top:0;z-index:100;background:var(--bg)}
+.nav-btn{padding:12px 18px;font-size:15px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;font-weight:500}
 .nav-btn:hover{color:#c8ccdc}
 .nav-btn.active{color:#fff;border-bottom-color:#5b8af7;font-weight:600}
 
@@ -82,70 +77,78 @@ input[type=file]{display:none}
 .file-detail{font-size:13px;color:var(--muted)}
 .divider{border:none;border-top:1px solid var(--border);margin:8px 0 22px}
 
+/* ── Charts ── */
+.charts-row{display:grid;gap:16px;margin-bottom:12px}
+/* ≤600px — one chart per row, vertical */
+@media(max-width:600px){.charts-row{grid-template-columns:1fr}}
+/* 601–1024px — one chart per row, horizontal (wide single) */
+@media(min-width:601px) and (max-width:1024px){.charts-row{grid-template-columns:1fr}}
+/* 1025–2000px — all charts in one horizontal row */
+@media(min-width:1025px) and (max-width:2000px){.charts-row{grid-template-columns:1fr 1fr 1fr}}
+/* >2000px — 2 chart-cards per row, vertical stack */
+@media(min-width:2001px){.charts-row{grid-template-columns:1fr 1fr}}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;min-width:0;overflow:hidden;width:100%}
+.card-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+.chart-wrap{position:relative;width:100%}
+
+/* ── Wide screen 2560px: 2 file-blocks side by side ── */
+@media(min-width:2560px){
+  .model-section.active{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  .file-block{margin-bottom:0}
+  .file-block .charts-row{grid-template-columns:1fr}
+}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--bg3);color:var(--muted);padding:8px 12px;text-align:left;font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap;font-size:13px}
+td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap}
+tr:hover td{background:rgba(255,255,255,.02)}
+.cell-skip{color:#f5a623;font-size:12px;font-weight:600}
+.cell-oom{color:#f05050;font-size:12px;font-weight:600}
+.cell-err{color:var(--muted);font-size:12px;cursor:help}
+
+.notice{padding:60px 24px;text-align:center;color:var(--muted);font-size:16px}
+.notice code{background:var(--bg2);padding:3px 8px;border-radius:4px;color:var(--text)}
+
 /* ── Mobile ── */
 @media(max-width:600px){
   .header{padding:10px 14px;gap:8px}
   .header-right{margin-left:0;width:100%}
   .gh-btn{width:100%;justify-content:center}
-
   .gpu-bar{padding:8px 14px;gap:8px}
   .gpu-bar-info{width:100%}
   .gpu-select{flex:1 1 calc(50% - 4px);min-width:0}
-
   .controls{padding:8px 14px;gap:8px}
+  .controls-models{width:100%}
+  .model-select{flex:1 1 calc(33% - 6px);min-width:0}
   .controls-sort{display:flex;align-items:center;gap:8px;width:100%}
   .controls-sort select{flex:1}
   .controls-range{display:flex;align-items:center;gap:8px;width:100%}
   .controls-range select{flex:1}
   .controls-toggles{display:flex;gap:6px;flex-wrap:wrap;width:100%;justify-content:center}
   .controls-right{margin-left:0;width:100%;gap:10px;justify-content:center}
-
   .content{padding:12px}
 }
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:12px}
-@media(max-width:700px){.charts-row{grid-template-columns:1fr}}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
-  padding:16px;min-width:0;overflow:hidden;width:100%}
-.card-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.6px;margin-bottom:12px}
-.chart-wrap{position:relative;width:100%}
-
-/* ── Table ── */
-.table-wrap{overflow-x:auto;margin-top:12px}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th{background:var(--bg3);color:var(--muted);padding:8px 12px;text-align:left;
-   font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap;font-size:13px}
-td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap}
-tr:hover td{background:rgba(255,255,255,.02)}
-
-.notice{padding:60px 24px;text-align:center;color:var(--muted);font-size:16px}
-.notice code{background:var(--bg2);padding:3px 8px;border-radius:4px;color:var(--text)}
 
 /* ── Modal ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);
-  z-index:1000;align-items:center;justify-content:center}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
-  width:560px;max-width:calc(100vw - 32px);max-height:90vh;overflow-y:auto}
-.modal-header{display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:560px;max-width:calc(100vw - 32px);max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
 .modal-title{font-size:16px;font-weight:600;color:var(--text)}
-.modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;
-  padding:2px 6px;border-radius:4px;transition:color .15s}
+.modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .15s}
 .modal-close:hover{color:#f05050}
 .modal-body{padding:20px}
 .help-section{margin-bottom:22px}
 .help-section:last-child{margin-bottom:0}
 .help-section-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px}
 .help-section p{font-size:13px;color:var(--muted);margin-bottom:8px;line-height:1.6}
-.help-link{display:inline-block;font-size:13px;color:#58a6ff;text-decoration:none;
-  padding:5px 12px;border:1px solid #30363d;border-radius:6px;background:var(--bg3);transition:border-color .15s}
+.help-link{display:inline-block;font-size:13px;color:#58a6ff;text-decoration:none;padding:5px 12px;border:1px solid #30363d;border-radius:6px;background:var(--bg3);transition:border-color .15s}
 .help-link:hover{border-color:#58a6ff}
 .help-download{color:#3dd68c;border-color:rgba(61,214,140,.3)}
 .help-download:hover{border-color:#3dd68c}
-.help-code{background:var(--bg);border:1px solid var(--border);border-radius:6px;
-  padding:10px 14px;font-family:'Consolas','Fira Mono',monospace;font-size:13px;
-  color:#e8eaf0;letter-spacing:.2px;user-select:all}
+.help-code{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:'Consolas','Fira Mono',monospace;font-size:13px;color:#e8eaf0;letter-spacing:.2px;user-select:all}
 .help-note{font-size:12px;color:var(--muted);margin-top:8px}
 .help-note code{background:var(--bg);padding:2px 6px;border-radius:4px;color:#a8d8a8}
 </style>
@@ -159,10 +162,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="add-btn" id="addBtn" onclick="addSlot()">+ Add file</div>
   <input type="file" id="fileIn" accept=".json" onchange="onFileChosen(this)">
   <div class="header-right">
-    <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/upload/main/results"
-       target="_blank" class="gh-btn gh-btn-green">+ Submit via GitHub <small style="opacity:.75;font-weight:400">(Account required)</small></a>
-    <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/issues"
-       target="_blank" class="gh-btn gh-btn-blue">+ Submit via Issues <small style="opacity:.75;font-weight:400">(Simple upload)</small></a>
+    <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/upload/main/results" target="_blank" class="gh-btn gh-btn-green">+ Submit via GitHub <small style="opacity:.75;font-weight:400">(Account required)</small></a>
+    <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/issues" target="_blank" class="gh-btn gh-btn-blue">+ Submit via Issues <small style="opacity:.75;font-weight:400">(Simple upload)</small></a>
   </div>
 </div>
 
@@ -174,12 +175,18 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <select class="gpu-select" id="gpuDataCenter"  onchange="onGpuSelect(this)"><option value="">Data Center</option></select>
   <select class="gpu-select" id="gpuWorkstation" onchange="onGpuSelect(this)"><option value="">Workstation</option></select>
   <select class="gpu-select" id="gpuBlackwell"   onchange="onGpuSelect(this)"><option value="">RTX 5xxx Blackwell</option></select>
-  <select class="gpu-select" id="gpuAda"         onchange="onGpuSelect(this)"><option value="">RTX 4xxx Ada</option></select>
+  <select class="gpu-select" id="gpuAda"         onchange="onGpuSelect(this)"><option value="">RTX 4xxx Ada Lovelace</option></select>
   <select class="gpu-select" id="gpuAmpere"      onchange="onGpuSelect(this)"><option value="">RTX 3xxx Ampere</option></select>
-  <select class="gpu-select" id="gpuTuring"      onchange="onGpuSelect(this)"><option value="">RTX 2xxx-16xx Turing</option></select>
+  <select class="gpu-select" id="gpuTuring"      onchange="onGpuSelect(this)"><option value="">RTX 2xxx / GTX 16xx Turing</option></select>
 </div>
 
 <div class="controls">
+  <div class="controls-models">
+    <label>Model:</label>
+    <select class="model-select" id="modelImage"  onchange="onModelSelect('image',this)"><option value="">Image</option></select>
+    <select class="model-select" id="modelVideo"  onchange="onModelSelect('video',this)"><option value="">Video</option></select>
+    <select class="model-select" id="modelAudio"  onchange="onModelSelect('audio',this)"><option value="">Audio</option></select>
+  </div>
   <div class="controls-sort">
     <label>Sort by:</label>
     <select id="sortBy" onchange="renderAll()">
@@ -210,7 +217,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
-<div class="nav" id="nav"></div>
+<div class="nav" id="nav" style="display:none"></div>
 <div class="content" id="content">
   <div class="notice">&#9203; Loading reference benchmark…</div>
 </div>
@@ -226,15 +233,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="help-section">
         <div class="help-section-title">&#128230; Repository</div>
         <p>Full documentation, setup instructions and community results are available on GitHub:</p>
-        <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer" target="_blank" class="help-link">
-          github.com/Rogala/SageAttention-Benchmark-Viewer
-        </a>
+        <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer" target="_blank" class="help-link">github.com/Rogala/SageAttention-Benchmark-Viewer</a>
       </div>
       <div class="help-section">
         <div class="help-section-title">&#128013; Benchmark Script</div>
         <p>To generate your own results, download the script and run it locally:</p>
-        <a href="https://raw.githubusercontent.com/Rogala/SageAttention-Benchmark-Viewer/main/sage_bench_models.py"
-           download="sage_bench_models.py" class="help-link help-download">&#11015; sage_bench_models.py</a>
+        <a href="https://raw.githubusercontent.com/Rogala/SageAttention-Benchmark-Viewer/main/sage_bench_models.py" download="sage_bench_models.py" class="help-link help-download">&#11015; sage_bench_models.py</a>
         <p style="margin-top:12px">Run command:</p>
         <div class="help-code">python sage_bench_models.py --warmup 20 --iters 100</div>
         <p class="help-note">The script automatically saves the result as a JSON file named after your GPU (e.g. <code>RTX-5060_Ti-16GB.json</code>) in the current directory.</p>
@@ -242,13 +246,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="help-section">
         <div class="help-section-title">&#128228; Share Your Results</div>
         <p>Upload your JSON to the community database via GitHub:</p>
-        <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/upload/main/results" target="_blank" class="help-link">
-          Upload via GitHub <small style="opacity:.6">(account required)</small>
-        </a>
+        <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/upload/main/results" target="_blank" class="help-link">Upload via GitHub <small style="opacity:.6">(account required)</small></a>
         <span style="color:var(--muted);margin:0 8px;font-size:13px">or</span>
-        <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/issues" target="_blank" class="help-link">
-          Post to Issues <small style="opacity:.6">(simple upload)</small>
-        </a>
+        <a href="https://github.com/Rogala/SageAttention-Benchmark-Viewer/issues" target="_blank" class="help-link">Post to Issues <small style="opacity:.6">(simple upload)</small></a>
       </div>
     </div>
   </div>
@@ -264,15 +264,42 @@ const ALL_KERNELS = [
 ];
 
 let files=[], models=[], activeTab=0, chartReg={};
+
+const MODEL_GROUPS = {
+  image: ['SDXL-1.0','SD3.5-Large','Flux.1-Dev (Kontext, Krea)','Flux.2-Dev','Flux.2-Dev (Klein 9B)','Z-Image (Turbo)','Qwen-Image-2512','Qwen-Image-Edit-2511','ERNIE-Image (Turbo)'],
+  video: ['LTX-2.3','Wan2.2','HunyuanVideo-1.5'],
+  audio: ['ACE-Step-1.5'],
+};
+
+function updateModelDropdowns(){
+  ['image','video','audio'].forEach(group=>{
+    const sel=document.getElementById('model'+group.charAt(0).toUpperCase()+group.slice(1));
+    const first=sel.options[0].outerHTML;
+    sel.innerHTML=first;
+    MODEL_GROUPS[group].forEach(m=>{
+      if(!models.includes(m)) return;
+      const o=document.createElement('option');
+      o.value=m; o.textContent=m;
+      if(models[activeTab]===m) o.selected=true;
+      sel.appendChild(o);
+    });
+  });
+}
+
+function onModelSelect(group,sel){
+  const m=sel.value; if(!m){return;}
+  const idx=models.indexOf(m);
+  if(idx>=0) switchTab(idx);
+  // reset other selects
+  ['image','video','audio'].filter(g=>g!==group).forEach(g=>{
+    const s=document.getElementById('model'+g.charAt(0).toUpperCase()+g.slice(1));
+    s.selectedIndex=0;
+  });
+}
 let hiddenKernels = new Set();
 
-// ── GitHub config ─────────────────────────────────────────────
-const GH = {
-  user:   'Rogala',
-  repo:   'SageAttention-Benchmark-Viewer',
-  folder: 'results',
-  ref:    'RTX-5060_Ti-16GB_Ref.json',
-};
+// ── GitHub ────────────────────────────────────────────────────
+const GH = { user:'Rogala', repo:'SageAttention-Benchmark-Viewer', folder:'results', ref:'5060-ti-16_Ref.json' };
 const GH_RAW = `https://raw.githubusercontent.com/${GH.user}/${GH.repo}/main/${GH.folder}`;
 const GH_API = `https://api.github.com/repos/${GH.user}/${GH.repo}/contents/${GH.folder}`;
 
@@ -285,77 +312,72 @@ const GPU_GROUPS = {
   gpuTuring:      /^(RTX[-_\s]?20|GTX[-_\s]?16)/i,
 };
 
-function fileToLabel(name){ return name.replace(/\.json$/i,'').replace(/[-_]/g,' '); }
-
-function fileGroup(name){
-  const gpu=name.replace(/\.json$/i,'');
-  for(const [id,re] of Object.entries(GPU_GROUPS)) if(re.test(gpu)) return id;
+function fileToLabel(n){ return n.replace(/\.json$/i,'').replace(/[-_]/g,' '); }
+function fileGroup(n){
+  const g=n.replace(/\.json$/i,'');
+  for(const [id,re] of Object.entries(GPU_GROUPS)) if(re.test(g)) return id;
   return null;
 }
-
-function populateDropdowns(fileList){
-  for(const id of Object.keys(GPU_GROUPS)){
-    const sel=document.getElementById(id);
-    sel.innerHTML=sel.options[0].outerHTML;
-  }
-  fileList.forEach(f=>{
-    const gid=fileGroup(f.name); if(!gid) return;
-    const opt=document.createElement('option');
-    opt.value=f.download_url;
-    opt.textContent=fileToLabel(f.name);
-    document.getElementById(gid).appendChild(opt);
-  });
+function populateDropdowns(list){
+  for(const id of Object.keys(GPU_GROUPS)){ const s=document.getElementById(id); s.innerHTML=s.options[0].outerHTML; }
+  list.forEach(f=>{ const gid=fileGroup(f.name); if(!gid) return; const o=document.createElement('option'); o.value=f.download_url; o.textContent=fileToLabel(f.name); document.getElementById(gid).appendChild(o); });
 }
-
 async function onGpuSelect(sel){
   const url=sel.value; if(!url){sel.selectedIndex=0;return;}
-  for(const id of Object.keys(GPU_GROUPS))
-    if(document.getElementById(id)!==sel) document.getElementById(id).selectedIndex=0;
+  for(const id of Object.keys(GPU_GROUPS)) if(document.getElementById(id)!==sel) document.getElementById(id).selectedIndex=0;
   await loadFromUrl(url, fileToLabel(sel.options[sel.selectedIndex].text));
   sel.selectedIndex=0;
 }
-
-async function loadFromUrl(url, label){
-  if(files.length>=5){alert('Maximum 5 files loaded at once. Remove one first.');return;}
+async function loadFromUrl(url,label){
+  if(files.length>=5){alert('Maximum 5 files. Remove one first.');return;}
   const name=label||url.split('/').pop().replace(/\.json$/i,'');
   if(files.find(f=>f.name===name)) return;
   try{
-    const resp=await fetch(url);
-    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data=await resp.json();
-    const idx=files.length;
-    files.push({data, name, color:FILE_COLORS[idx%FILE_COLORS.length], ev:data.env||{}});
+    const resp=await fetch(url); if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data=await resp.json(); const idx=files.length;
+    files.push({data,name,color:FILE_COLORS[idx%FILE_COLORS.length],ev:data.env||{}});
     updateModels(); renderSlots(); renderAll();
-  }catch(e){
-    console.error('Failed to load',url,e);
-    alert(`Could not load file:\n${url}\n\n${e.message}`);
-  }
+  }catch(e){ console.error(e); alert(`Could not load:\n${url}\n\n${e.message}`); }
 }
-
 async function init(){
   await loadFromUrl(`${GH_RAW}/${GH.ref}`, GH.ref.replace(/\.json$/i,''));
   try{
-    const resp=await fetch(GH_API);
-    if(!resp.ok) throw new Error(`GitHub API ${resp.status}`);
+    const resp=await fetch(GH_API); if(!resp.ok) throw new Error();
     const list=await resp.json();
     populateDropdowns(list.filter(f=>f.name.endsWith('.json')&&!f.name.includes('Ref')));
-  }catch(e){ console.warn('Could not fetch community results list:',e.message); }
+  }catch(e){ console.warn('Community list unavailable'); }
 }
-
 init();
 
-let _lastWidth = window.innerWidth;
-window.addEventListener('resize', ()=>{
-  const w = window.innerWidth;
-  if(w === _lastWidth) return; // ignore height-only changes (mobile keyboard/scrollbar)
-  _lastWidth = w;
-  clearTimeout(window._rt);
-  window._rt = setTimeout(renderAll, 200);
-});
+let _lastWidth=window.innerWidth;
+window.addEventListener('resize',()=>{ const w=window.innerWidth; if(w===_lastWidth) return; _lastWidth=w; clearTimeout(window._rt); window._rt=setTimeout(renderAll,200); });
 
 // ── Helpers ───────────────────────────────────────────────────
+// Визначення стану конфігу/ядра
+function cfgStatus(cfg){
+  // весь конфіг пропущено через VRAM
+  if(cfg.skip) return {type:'skip', msg:cfg.skip};
+  return null;
+}
+function kernelStatus(cfg, key){
+  const v=cfg[key];
+  if(!v) return null;
+  if(v.skip) return {type:'skip', msg:v.skip};
+  if(v.error){
+    if(v.error.includes('OutOfMemoryError')||v.error.includes('out of memory')) return {type:'oom', msg:v.error};
+    return {type:'error', msg:v.error};
+  }
+  return null;
+}
 function getV(cfg,key,field='median_ms'){
-  const v=cfg[key]; return (v&&v[field]!=null)?v[field]:null;
+  const v=cfg[key];
+  if(!v||v.error||v.skip||cfg.skip) return null;
+  return v[field]!=null?v[field]:null;
+}
+function getKV(cfg,key,field){
+  const v=cfg[key];
+  if(!v||v.error||v.skip||cfg.skip) return null;
+  return v[field]!=null?v[field]:null;
 }
 function activeKernelList(){ return ALL_KERNELS.filter(k=>!hiddenKernels.has(k.key)); }
 
@@ -365,195 +387,91 @@ function toggleKernel(key){
   document.getElementById(ids[key]).classList.toggle('active');
   renderAll();
 }
-
-function addSlot(){
-  if(files.length>=5) return;
-  document.getElementById('fileIn').value='';
-  document.getElementById('fileIn').click();
-}
-
+function addSlot(){ if(files.length>=5) return; document.getElementById('fileIn').value=''; document.getElementById('fileIn').click(); }
 function onFileChosen(inp){
   const f=inp.files[0]; if(!f) return;
   const r=new FileReader();
-  r.onload=e=>{
-    try{
-      const data=JSON.parse(e.target.result);
-      const idx=files.length;
-      const fname=f.name.replace(/\.json$/i,'');
-      files.push({data, name:fname, color:FILE_COLORS[idx%FILE_COLORS.length], ev:data.env||{}});
-      updateModels(); renderSlots(); renderAll();
-    }catch(ex){alert('JSON error: '+ex);}
-  };
+  r.onload=e=>{ try{ const data=JSON.parse(e.target.result); const idx=files.length; files.push({data,name:f.name.replace(/\.json$/i,''),color:FILE_COLORS[idx%FILE_COLORS.length],ev:data.env||{}}); updateModels();renderSlots();renderAll(); }catch(ex){alert('JSON error: '+ex);} };
   r.readAsText(f);
 }
-
 function removeFile(idx){
-  Object.keys(chartReg).forEach(id=>{
-    const p=id.split('_');
-    if((id.startsWith('lat_')||id.startsWith('spd_'))&&p[2]==='f'+idx){
-      chartReg[id].destroy(); delete chartReg[id];
-    }
-  });
-  files.splice(idx,1);
-  files.forEach((f,i)=>f.color=FILE_COLORS[i%FILE_COLORS.length]);
-  updateModels(); renderSlots(); renderAll();
+  Object.keys(chartReg).forEach(id=>{ if(id.includes(`_f${idx}`)){ chartReg[id].destroy(); delete chartReg[id]; } });
+  files.splice(idx,1); files.forEach((f,i)=>f.color=FILE_COLORS[i%FILE_COLORS.length]);
+  updateModels();renderSlots();renderAll();
 }
-
 function renderSlots(){
-  const el=document.getElementById('slots');
-  el.innerHTML='';
-  files.forEach((f,i)=>{
-    const div=document.createElement('div');
-    div.className='slot loaded';
-    div.style.borderColor=f.color;
-    div.innerHTML=`
-      <span class="dot" style="background:${f.color}"></span>
-      <span class="sname" style="color:${f.color}">${f.name}</span>
-      <span class="sclose" onclick="removeFile(${i});event.stopPropagation()">&#10005;</span>`;
-    el.appendChild(div);
-  });
+  const el=document.getElementById('slots'); el.innerHTML='';
+  files.forEach((f,i)=>{ const d=document.createElement('div'); d.className='slot loaded'; d.style.borderColor=f.color; d.innerHTML=`<span class="dot" style="background:${f.color}"></span><span class="sname" style="color:${f.color}">${f.name}</span><span class="sclose" onclick="removeFile(${i});event.stopPropagation()">&#10005;</span>`; el.appendChild(d); });
   document.getElementById('addBtn').style.display=files.length>=5?'none':'';
 }
-
 function updateModels(){
   const seen=new Set(); models=[];
-  files.forEach(({data})=>{
-    data.configs.forEach(c=>{
-      const m=c.label.startsWith('[')?c.label.slice(1,c.label.indexOf(']')):'Other';
-      if(!seen.has(m)){seen.add(m);models.push(m);}
-    });
-  });
+  files.forEach(({data})=>{ data.configs.forEach(c=>{ const m=c.label.startsWith('[')?c.label.slice(1,c.label.indexOf(']')):'Other'; if(!seen.has(m)){seen.add(m);models.push(m);} }); });
 }
-
 function buildModelMap(){
   const map={};
-  files.forEach((f,fi)=>{
-    f.data.configs.forEach(c=>{
-      const m=c.label.startsWith('[')?c.label.slice(1,c.label.indexOf(']')):'Other';
-      if(!map[m]) map[m]={};
-      if(!map[m][fi]) map[m][fi]=[];
-      map[m][fi].push(c);
-    });
-  });
+  files.forEach((f,fi)=>{ f.data.configs.forEach(c=>{ const m=c.label.startsWith('[')?c.label.slice(1,c.label.indexOf(']')):'Other'; if(!map[m])map[m]={}; if(!map[m][fi])map[m][fi]=[]; map[m][fi].push(c); }); });
   return map;
 }
-
 function switchTab(i){
   activeTab=i;
   document.querySelectorAll('.nav-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
   document.querySelectorAll('.model-section').forEach((sec,j)=>{
     sec.classList.toggle('active',j===i);
-    // lazy build charts for this section if not yet built
-    if(j===i && sec.dataset.pending){
-      delete sec.dataset.pending;
-      sec.querySelectorAll('.file-block[data-lat]').forEach(block=>{
-        const cfgs=JSON.parse(block.dataset.cfgs);
-        const sl=JSON.parse(block.dataset.labels);
-        const lid=block.dataset.lat, sid=block.dataset.spd, tid=block.dataset.tid;
-        setTimeout(()=>{ buildLatency(lid,cfgs,sl); buildSpeedup(sid,cfgs,sl); buildTable(tid,cfgs,sl); },0);
-      });
-    }
+    if(j===i&&sec.dataset.pending){ delete sec.dataset.pending; sec.querySelectorAll('.file-block[data-lat]').forEach(block=>{ const cfgs=JSON.parse(block.dataset.cfgs),sl=JSON.parse(block.dataset.labels); setTimeout(()=>{ buildLatency(block.dataset.lat,cfgs,sl); buildTflops(block.dataset.tfl,cfgs,sl); buildSpeedup(block.dataset.spd,cfgs,sl); buildTable(block.dataset.tid,cfgs,sl); },0); }); }
   });
 }
-
-// cfgKeys: унікальні label-ключі конфігів для цієї моделі (з першого файлу що має їх)
-// modelMap: {model: {fi: [cfg,...]}}
-function sortConfigKeys(labelKeys, model, modelMap, sortBy){
-  if(sortBy==='none') return labelKeys;
-
-  // для кожного label-ключа рахуємо середнє по всіх файлах
-  const score = key => {
-    let sum=0, count=0;
-    files.forEach((_,fi)=>{
-      const cfgs=(modelMap[model]&&modelMap[model][fi])||[];
-      const c=cfgs.find(c=>c.label===key);
-      if(!c) return;
-      if(sortBy==='speedup'){
-        const s=getV(c,'sdpa'), a=getV(c,'sa2');
-        if(s&&a&&a>0){ sum+=s/a; count++; }
-      } else if(sortBy==='latency_sa2'){
-        const v=getV(c,'sa2'); if(v!=null){ sum+=v; count++; }
-      } else if(sortBy==='latency_sdpa'){
-        const v=getV(c,'sdpa'); if(v!=null){ sum+=v; count++; }
-      }
-    });
-    return count ? sum/count : (sortBy==='speedup' ? 0 : 999);
-  };
-
-  return [...labelKeys].sort((a,b)=>
-    sortBy==='speedup' ? score(b)-score(a) : score(a)-score(b)
-  );
+function sortConfigKeys(keys,model,modelMap,sortBy){
+  if(sortBy==='none') return keys;
+  const score=key=>{ let sum=0,count=0; files.forEach((_,fi)=>{ const cfgs=(modelMap[model]&&modelMap[model][fi])||[]; const c=cfgs.find(c=>c.label===key); if(!c) return; if(sortBy==='speedup'){const s=getV(c,'sdpa'),a=getV(c,'sa2');if(s&&a&&a>0){sum+=s/a;count++;}}else if(sortBy==='latency_sa2'){const v=getV(c,'sa2');if(v!=null){sum+=v;count++;}}else if(sortBy==='latency_sdpa'){const v=getV(c,'sdpa');if(v!=null){sum+=v;count++;}}}); return count?sum/count:(sortBy==='speedup'?0:999); };
+  return [...keys].sort((a,b)=>sortBy==='speedup'?score(b)-score(a):score(a)-score(b));
 }
 
 // ── Render ────────────────────────────────────────────────────
 function renderAll(){
-  if(!files.length){
-    document.getElementById('nav').innerHTML='';
-    document.getElementById('content').innerHTML='<div class="notice">Click <strong>+ Add file</strong> to load <code>models.json</code></div>';
-    return;
-  }
-  Object.values(chartReg).forEach(ch=>ch.destroy());
-  chartReg={};
-
+  if(!files.length){ document.getElementById('nav').innerHTML=''; document.getElementById('content').innerHTML='<div class="notice">Click <strong>+ Add file</strong> to load results</div>'; return; }
+  Object.values(chartReg).forEach(ch=>ch.destroy()); chartReg={};
   const sortBy=document.getElementById('sortBy').value;
   const modelMap=buildModelMap();
-
-  const nav=document.getElementById('nav');
-  nav.innerHTML='';
-  models.forEach((m,i)=>{
-    const btn=document.createElement('div');
-    btn.className='nav-btn'+(i===activeTab?' active':'');
-    btn.textContent=m;
-    btn.onclick=()=>switchTab(i);
-    nav.appendChild(btn);
-  });
-
-  const content=document.getElementById('content');
-  content.innerHTML='';
+  const nav=document.getElementById('nav'); nav.innerHTML='';
+  models.forEach((m,i)=>{ const btn=document.createElement('div'); btn.className='nav-btn'+(i===activeTab?' active':''); btn.textContent=m; btn.onclick=()=>switchTab(i); nav.appendChild(btn); });
+  updateModelDropdowns();
+  const content=document.getElementById('content'); content.innerHTML='';
 
   models.forEach((model,mi)=>{
     const sec=document.createElement('div');
     sec.className='model-section'+(mi===activeTab?' active':'');
-
-    // збираємо всі унікальні label-ключі для цієї моделі з усіх файлів
-    const allKeys=[];
-    const seen=new Set();
-    files.forEach((_,fi)=>{
-      ((modelMap[model]&&modelMap[model][fi])||[]).forEach(c=>{
-        if(!seen.has(c.label)){seen.add(c.label);allKeys.push(c.label);}
-      });
-    });
-    const sortedKeys=sortConfigKeys(allKeys, model, modelMap, sortBy);
+    const allKeys=[]; const seen=new Set();
+    files.forEach((_,fi)=>{ ((modelMap[model]&&modelMap[model][fi])||[]).forEach(c=>{ if(!seen.has(c.label)){seen.add(c.label);allKeys.push(c.label);} }); });
+    const sortedKeys=sortConfigKeys(allKeys,model,modelMap,sortBy);
 
     files.forEach((f,fi)=>{
-      const cfgsRaw=(modelMap[model]&&modelMap[model][fi])||[];
-      if(!cfgsRaw.length) return;
-      // впорядковуємо конфіги цього файлу по sortedKeys
+      const cfgsRaw=(modelMap[model]&&modelMap[model][fi])||[]; if(!cfgsRaw.length) return;
       const cfgMap=Object.fromEntries(cfgsRaw.map(c=>[c.label,c]));
       const cfgs=sortedKeys.map(k=>cfgMap[k]).filter(Boolean);
       const shortLabels=cfgs.map(c=>c.label.replace(/^\[[^\]]+\]\s*/,''));
       const isMobile=window.innerWidth<=600;
-      // horizontal bars: height per row; vertical bars: fixed height
-      const h=isMobile
-        ? Math.max(200, Math.min(cfgs.length*28+80, 400))
-        : Math.max(160, Math.min(shortLabels.length*44+60, 1200));
-
-      const latId=`lat_${mi}_f${fi}`;
-      const spdId=`spd_${mi}_f${fi}`;
-      const tblId=`tbl_${mi}_f${fi}`;
+      const isWide=window.innerWidth>=2560;
+      const flipAxis=isMobile||isWide;
+      const h=flipAxis?Math.max(200,Math.min(cfgs.length*28+80,500)):Math.max(160,Math.min(shortLabels.length*44+60,1200));
       const ev=f.ev;
+      const latId=`lat_${mi}_f${fi}`, tflId=`tfl_${mi}_f${fi}`, spdId=`spd_${mi}_f${fi}`, tblId=`tbl_${mi}_f${fi}`;
 
       const block=document.createElement('div');
       block.className='file-block';
       block.innerHTML=`
         <div class="file-header">
           <span class="file-badge" style="background:${f.color}28;color:${f.color}">${f.name}</span>
-          <span class="file-detail">py${ev.python||'?'} &middot; torch ${ev.torch||'?'} &middot; triton ${ev.triton||'?'} &middot; SA2 ${ev.sageattention||'?'} &middot; SA3 ${ev.sageattn3||'?'}</span>
+          <span class="file-detail">${ev.gpu||''} ${ev.vram_gb?ev.vram_gb+'GB':''} ${ev.compute_cap?'· '+ev.compute_cap:''} · py${ev.python||'?'} · torch ${ev.torch||'?'} · SA2 ${ev.sageattention||'?'} · SA3 ${ev.sageattn3||'?'}</span>
         </div>
         <div class="charts-row">
           <div class="card">
-            <div class="card-title">Latency (ms, lower is better)</div>
+            <div class="card-title">Latency ms (lower is better)</div>
             <div class="chart-wrap" style="height:${h}px"><canvas id="${latId}"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-title">TFLOPS (higher is better)</div>
+            <div class="chart-wrap" style="height:${h}px"><canvas id="${tflId}"></canvas></div>
           </div>
           <div class="card">
             <div class="card-title">Speedup vs SDPA (higher is better)</div>
@@ -568,202 +486,201 @@ function renderAll(){
       sec.appendChild(block);
 
       if(mi===activeTab){
-        ;(function(lid,sid,tid,c,sl){
-          setTimeout(()=>{ buildLatency(lid,c,sl); buildSpeedup(sid,c,sl); buildTable(tid,c,sl); },0);
-        })(latId,spdId,tblId,cfgs,shortLabels);
+        ;(function(lid,tld,sid,tid,c,sl){ setTimeout(()=>{ buildLatency(lid,c,sl); buildTflops(tld,c,sl); buildSpeedup(sid,c,sl); buildTable(tid,c,sl); },0); })(latId,tflId,spdId,tblId,cfgs,shortLabels);
       } else {
-        // mark as pending — will be built on first switchTab
         sec.dataset.pending='1';
-        block.dataset.lat=latId; block.dataset.spd=spdId;
-        block.dataset.tid=tblId;
-        block.dataset.cfgs=JSON.stringify(cfgs);
-        block.dataset.labels=JSON.stringify(shortLabels);
+        block.dataset.lat=latId; block.dataset.tfl=tflId; block.dataset.spd=spdId; block.dataset.tid=tblId;
+        block.dataset.cfgs=JSON.stringify(cfgs); block.dataset.labels=JSON.stringify(shortLabels);
       }
     });
-
     content.appendChild(sec);
   });
 }
 
-// ── Chart options ─────────────────────────────────────────────
+// ── Chart base options ────────────────────────────────────────
 const gOpts={
   indexAxis:'y', responsive:true, maintainAspectRatio:false,
   plugins:{legend:{display:false}},
   scales:{
-    x:{ticks:{color:'#9aa0b8',font:{size:12}}, grid:{color:'rgba(255,255,255,.06)'}},
-    y:{ticks:{color:'#e8eaf0',font:{size:12}}, grid:{color:'rgba(255,255,255,.03)'}},
+    x:{ticks:{color:'#9aa0b8',font:{size:12}},grid:{color:'rgba(255,255,255,.06)'}},
+    y:{ticks:{color:'#e8eaf0',font:{size:12}},grid:{color:'rgba(255,255,255,.03)'}},
   }
 };
+function makeOpts(flipAxis,isWide){
+  const o=JSON.parse(JSON.stringify(gOpts));
+  o.indexAxis=flipAxis?'x':'y';
+  if(flipAxis){ o.scales.x.ticks.maxRotation=45; o.scales.x.ticks.font={size:isWide?11:10}; o.scales.y.ticks.font={size:isWide?12:11}; }
+  return o;
+}
+const LOG_TICKS=[0.1,0.2,0.5,1,2,5,10,20,50,100,200,500,1000];
 
+// ── Latency chart (log scale + datalabels) ────────────────────
 function buildLatency(id,cfgs,labels){
   const showRange=document.getElementById('showRange').value==='minmax';
   const kernels=activeKernelList();
-  const isMobile=window.innerWidth<=600;
+  const isMobile=window.innerWidth<=600, isWide=window.innerWidth>=2560, flipAxis=isMobile||isWide;
   const datasets=[];
-
   kernels.forEach(({key,label,color})=>{
-    const data=cfgs.map(c=>getV(c,key));
-    if(!data.some(v=>v!==null)) return;
-    datasets.push({label, data:data.map(v=>v??null),
-      backgroundColor:color+'99', borderColor:color, borderWidth:1, skipNull:true});
-    if(showRange){
-      const rd=cfgs.map(c=>{
-        const mn=getV(c,key,'min_ms'),mx=getV(c,key,'max_ms');
-        return (mn!=null&&mx!=null)?[mn,mx]:null;
-      });
-      if(rd.some(v=>v!==null))
-        datasets.push({label:label+' range', data:rd,
-          backgroundColor:color+'30', borderColor:color+'70',
-          borderWidth:1, borderSkipped:false, skipNull:true});
-    }
+    const data=cfgs.map(c=>getV(c,key)); if(!data.some(v=>v!==null)) return;
+    datasets.push({label,data:data.map(v=>v??null),backgroundColor:color+'99',borderColor:color,borderWidth:1,skipNull:true});
+    if(showRange){ const rd=cfgs.map(c=>{ const mn=getV(c,key,'min_ms'),mx=getV(c,key,'max_ms'); return(mn!=null&&mx!=null)?[mn,mx]:null; }); if(rd.some(v=>v!==null)) datasets.push({label:label+' range',data:rd,backgroundColor:color+'30',borderColor:color+'70',borderWidth:1,borderSkipped:false,skipNull:true}); }
   });
-
-  const opts=JSON.parse(JSON.stringify(gOpts));
-  opts.indexAxis = isMobile ? 'x' : 'y';
-  opts.scales.x.ticks.callback = isMobile
-    ? v=>v!=null?v.toFixed(1)+'ms':''
-    : v=>v!=null?v.toFixed(1)+'ms':'';
-  opts.scales.x.min=0;
-  if(isMobile){
-    opts.scales.y.ticks.callback=v=>v!=null?v.toFixed(1)+'ms':'';
-    opts.scales.x.ticks.maxRotation=45;
-    opts.scales.x.ticks.font={size:10};
-    opts.scales.y.ticks.font={size:11};
-  }
+  const o=makeOpts(flipAxis,isWide);
+  o.scales.x.min=undefined; o.scales.y.min=undefined;
+  if(flipAxis){ o.scales.y.type='logarithmic'; o.scales.y.ticks={color:'#9aa0b8',font:{size:isWide?12:11},callback:v=>LOG_TICKS.includes(+v.toFixed(1))?v.toFixed(1)+'ms':''}; }
+  else{ o.scales.x.type='logarithmic'; o.scales.x.ticks={color:'#9aa0b8',font:{size:12},callback:v=>LOG_TICKS.includes(+v.toFixed(1))?v.toFixed(1)+'ms':''}; }
+  o.plugins.datalabels={display:ctx=>ctx.dataset.data[ctx.dataIndex]!==null&&!ctx.dataset.label.includes('range'),formatter:v=>Array.isArray(v)?'':(v!=null?v.toFixed(1):''),color:'#e8eaf0',font:{size:10,weight:'600'},anchor:'end',align:flipAxis?'top':'right',offset:2,clip:false};
+  o.layout={padding:{top:20,right:flipAxis?0:40}};
   if(chartReg[id]) chartReg[id].destroy();
-  chartReg[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},options:opts});
+  chartReg[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},options:o});
 }
 
+// ── TFLOPS chart ──────────────────────────────────────────────
+function buildTflops(id,cfgs,labels){
+  const kernels=activeKernelList();
+  const isMobile=window.innerWidth<=600, isWide=window.innerWidth>=2560, flipAxis=isMobile||isWide;
+  const datasets=kernels.map(({key,label,color})=>{
+    const data=cfgs.map(c=>getKV(c,key,'tflops')); if(!data.some(v=>v!==null)) return null;
+    return {label,data:data.map(v=>v??null),backgroundColor:color+'99',borderColor:color,borderWidth:1,skipNull:true};
+  }).filter(Boolean);
+  const o=makeOpts(flipAxis,isWide);
+  o.scales.x.min=0;
+  if(flipAxis){ o.scales.y.ticks.callback=v=>v!=null?v.toFixed(0)+'T':''; }
+  else{ o.scales.x.ticks.callback=v=>v!=null?v.toFixed(0)+'T':''; }
+  o.plugins.datalabels={display:false};
+  if(chartReg[id]) chartReg[id].destroy();
+  chartReg[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},options:o});
+}
+
+// ── Speedup chart ─────────────────────────────────────────────
 function buildSpeedup(id,cfgs,labels){
   const kernels=activeKernelList().filter(k=>k.key!=='sdpa');
-  const isMobile=window.innerWidth<=600;
+  const isMobile=window.innerWidth<=600, isWide=window.innerWidth>=2560, flipAxis=isMobile||isWide;
   const datasets=kernels.map(({key,label,color})=>{
-    const data=cfgs.map(c=>{
-      const s=getV(c,'sdpa'),k=getV(c,key);
-      return (!s||!k||k===0)?null:parseFloat((s/k).toFixed(1));
-    });
+    const data=cfgs.map(c=>{ const s=getV(c,'sdpa'),k=getV(c,key); return(!s||!k||k===0)?null:parseFloat((s/k).toFixed(1)); });
     if(!data.some(v=>v!==null)) return null;
     return {label,data,backgroundColor:color+'99',borderColor:color,borderWidth:1};
   }).filter(Boolean);
-
-  const opts=JSON.parse(JSON.stringify(gOpts));
-  opts.indexAxis = isMobile ? 'x' : 'y';
-  opts.scales.x.min=0;
-  if(isMobile){
-    opts.scales.x.ticks.maxRotation=45;
-    opts.scales.x.ticks.font={size:10};
-    opts.scales.y.ticks.callback=v=>v!=null?v.toFixed(1)+'x':'';
-    opts.scales.y.ticks.font={size:11};
-  } else {
-    opts.scales.x.ticks.callback=v=>v!=null?v.toFixed(1)+'x':'';
-  }
+  const o=makeOpts(flipAxis,isWide);
+  o.scales.x.min=0;
+  o.plugins.datalabels={display:false};
+  if(flipAxis){ o.scales.y.ticks.callback=v=>v!=null?v.toFixed(1)+'x':''; o.scales.y.ticks.font={size:isWide?12:11}; }
+  else{ o.scales.x.ticks.callback=v=>v!=null?v.toFixed(1)+'x':''; }
   if(chartReg[id]) chartReg[id].destroy();
-  chartReg[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},options:opts});
+  chartReg[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},options:o});
+}
+
+// ── Table ─────────────────────────────────────────────────────
+function cellStatus(cfg,key){
+  // весь конфіг skip
+  if(cfg.skip) return `<span class="cell-skip" title="${cfg.skip}">SKIP</span>`;
+  const v=cfg[key]; if(!v) return null;
+  if(v.skip) return `<span class="cell-skip" title="${v.skip}">SKIP</span>`;
+  if(v.error){
+    if(v.error.includes('OutOfMemoryError')||v.error.includes('out of memory'))
+      return `<span class="cell-oom" title="${v.error}">OOM</span>`;
+    return `<span class="cell-err" title="${v.error}">&mdash; &#9432;</span>`;
+  }
+  return null;
 }
 
 function buildTable(id,cfgs,labels){
   const kernels=activeKernelList();
   const showRange=document.getElementById('showRange').value==='minmax';
   const isMobile=window.innerWidth<=600;
+  const showSpeedup=!hiddenKernels.has('sdpa')&&!hiddenKernels.has('sa2');
 
   const sumVals=Object.fromEntries(kernels.map(k=>[k.key,[]]));
   const speedups=[];
 
-  // pre-compute values
   const rows=cfgs.map((c,i)=>{
-    const sdpaV=getV(c,'sdpa');
     const vals=kernels.map(({key})=>getV(c,key));
     const validVals=vals.filter(v=>v!==null);
     const minV=validVals.length?Math.min(...validVals):null;
-    const sa2v=getV(c,'sa2');
-    let sp=null;
-    if(sdpaV&&sa2v&&sa2v>0){ sp=sdpaV/sa2v; speedups.push(sp); }
+    const sa2v=getV(c,'sa2'), sdpaV=getV(c,'sdpa');
+    let sp=null; if(sdpaV&&sa2v&&sa2v>0){sp=sdpaV/sa2v;speedups.push(sp);}
     vals.forEach((v,ci)=>{ if(v!==null) sumVals[kernels[ci].key].push(v); });
-    return {label:labels[i], vals, minV, sp};
+    // VRAM: беремо максимум серед ядер для цього конфігу
+    const vrams=kernels.map(({key})=>getKV(c,key,'peak_vram_mib')).filter(v=>v!==null);
+    const maxVram=vrams.length?Math.max(...vrams):null;
+    return {label:labels[i],vals,minV,sp,maxVram,cfg:c};
   });
 
   let html='';
 
   if(isMobile){
-    // ── Transposed: kernels as rows, configs as columns ──
-    // summary row values
     const sv=kernels.map(({key})=>{const a=sumVals[key];return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;});
     const sm=sv.filter(v=>v!==null).length?Math.min(...sv.filter(v=>v!==null)):null;
     const avgSp=speedups.length?speedups.reduce((a,b)=>a+b,0)/speedups.length:null;
 
-    html+=`<table><thead><tr>
-      <th>Kernel</th>
-      ${rows.map(r=>`<th style="font-size:11px;max-width:90px;white-space:normal;line-height:1.3">${r.label}</th>`).join('')}
-      ${rows.length>1?`<th style="color:var(--muted);font-size:11px">avg</th>`:''}
-    </tr></thead><tbody>`;
+    html+=`<table><thead><tr><th>Kernel</th>${rows.map(r=>`<th style="font-size:11px;max-width:90px;white-space:normal;line-height:1.3">${r.label}</th>`).join('')}${rows.length>1?`<th style="color:var(--muted);font-size:11px">avg</th>`:''}</tr></thead><tbody>`;
 
     kernels.forEach(({key,label,color},ci)=>{
       html+=`<tr><td style="color:${color};font-weight:600;white-space:nowrap">${label}</td>`;
       rows.forEach(r=>{
+        const st=cellStatus(r.cfg,key);
         const v=r.vals[ci];
-        const best=v!==null&&v===r.minV;
-        const style=best?`style="color:${color};font-weight:600"`:'';
-        let cell='&mdash;';
-        if(v!==null){
-          cell=v.toFixed(1);
-          if(showRange){
-            const mn=getV(cfgs[rows.indexOf(r)],key,'min_ms'),mx=getV(cfgs[rows.indexOf(r)],key,'max_ms');
-            if(mn!=null&&mx!=null)
-              cell+=`<br><small style="color:var(--muted);font-size:10px">${mn.toFixed(1)}&ndash;${mx.toFixed(1)}</small>`;
-          }
-        }
-        html+=`<td ${style}>${cell}</td>`;
+        const best=v!==null&&r.minV!==null&&v===r.minV;
+        let cell=st||(v!==null?v.toFixed(1)+' ms': `<span class="cell-err">&mdash;</span>`);
+        if(v!==null&&showRange){ const mn=getKV(r.cfg,key,'min_ms'),mx=getKV(r.cfg,key,'max_ms'); if(mn!=null&&mx!=null) cell=v.toFixed(1)+` ms<br><small style="color:var(--muted);font-size:10px">${mn.toFixed(1)}&ndash;${mx.toFixed(1)}</small>`; }
+        html+=`<td ${best&&!st?`style="color:${color};font-weight:600"`:''} >${cell}</td>`;
       });
-      if(rows.length>1){
-        const avg=sv[ci];
-        const best=avg!==null&&avg===sm;
-        html+=`<td ${best?`style="color:${color};font-weight:700"`:`style="color:var(--muted)"`}>${avg!==null?avg.toFixed(1):'&mdash;'}</td>`;
-      }
+      if(rows.length>1){ const avg=sv[ci]; const best=avg!==null&&avg===sm; html+=`<td ${best?`style="color:${color};font-weight:700"`:`style="color:var(--muted)"`}>${avg!==null?avg.toFixed(1)+' ms':'&mdash;'}</td>`; }
+      html+=`</tr>`;
+      // VRAM subrow for this kernel
+      html+=`<tr><td style="color:var(--muted);font-size:11px;padding-top:0">(VRAM)</td>`;
+      rows.forEach(r=>{
+        const vv=getKV(r.cfg,key,'peak_vram_mib');
+        html+=`<td style="color:var(--muted);font-size:11px;padding-top:0">${vv!=null?'('+( vv>=1024?(vv/1024).toFixed(1)+'GB':vv+'MB')+')':'&mdash;'}</td>`;
+      });
+      if(rows.length>1) html+=`<td></td>`;
       html+=`</tr>`;
     });
 
-    // speedup row
-    html+=`<tr style="border-top:1px solid rgba(255,255,255,.1)">
-      <td style="color:var(--muted);font-size:12px;font-weight:600">SA2 vs SDPA</td>`;
-    rows.forEach(r=>{
-      const spTxt=r.sp!==null
-        ?`<span style="color:${r.sp>=1?'#3dd68c':'#f05050'};font-weight:600">${r.sp.toFixed(1)}x</span>`
-        :'&mdash;';
-      html+=`<td>${spTxt}</td>`;
-    });
-    if(rows.length>1){
-      html+=`<td>${avgSp!==null?`<span style="color:${avgSp>=1?'#3dd68c':'#f05050'};font-weight:600">${avgSp.toFixed(1)}x</span>`:'&mdash;'}</td>`;
+    // SA2 vs SDPA row
+    if(showSpeedup){
+      html+=`<tr style="border-top:1px solid rgba(255,255,255,.08)"><td style="color:var(--muted);font-size:12px;font-weight:600">SA2 vs SDPA</td>`;
+      rows.forEach(r=>{ html+=`<td>${r.sp!==null?`<span style="color:${r.sp>=1?'#3dd68c':'#f05050'};font-weight:600">${r.sp.toFixed(1)}x</span>`:'&mdash;'}</td>`; });
+      if(rows.length>1) html+=`<td>${avgSp!==null?`<span style="color:${avgSp>=1?'#3dd68c':'#f05050'};font-weight:600">${avgSp.toFixed(1)}x</span>`:'&mdash;'}</td>`;
+      html+=`</tr>`;
     }
+
+    // Best row
+    html+=`<tr style="border-top:1px solid rgba(255,255,255,.08)"><td style="color:var(--muted);font-size:12px;font-weight:600">Best</td>`;
+    rows.forEach(r=>{
+      const bi=r.minV!==null?r.vals.indexOf(r.minV):-1;
+      const bestLabel=r.cfg.skip?`<span class="cell-skip">SKIP</span>`:(bi>=0?`<span style="color:${kernels[bi].color};font-weight:600">${kernels[bi].label}</span>`:'&mdash;');
+      html+=`<td style="font-size:12px">${bestLabel}</td>`;
+    });
+    if(rows.length>1) html+=`<td></td>`;
     html+=`</tr>`;
 
+
+
   } else {
-    // ── Normal: configs as rows, kernels as columns ──
-    html+=`<table><thead><tr><th>Config</th>
-      ${kernels.map(c=>`<th style="color:${c.color}">${c.label}</th>`).join('')}
-      <th>SA2 vs SDPA</th><th>Best</th></tr></thead><tbody>`;
+    html+=`<table><thead><tr>
+      <th>Config</th>
+      ${kernels.map(c=>`<th style="color:${c.color}">${c.label} <span style="color:var(--muted);font-weight:400;font-size:11px">(VRAM)</span></th>`).join('')}
+      ${showSpeedup?'<th>SA2 vs SDPA</th>':''}
+      <th>Best</th>
+    </tr></thead><tbody>`;
 
     rows.forEach((r,i)=>{
       html+=`<tr><td>${r.label}</td>`;
       r.vals.forEach((v,ci)=>{
-        const best=v!==null&&v===r.minV;
-        const style=best?`style="color:${kernels[ci].color};font-weight:600"`:'';
-        let cell='&mdash;';
-        if(v!==null){
-          cell=v.toFixed(1)+' ms';
-          if(showRange){
-            const mn=getV(cfgs[i],kernels[ci].key,'min_ms'),mx=getV(cfgs[i],kernels[ci].key,'max_ms');
-            if(mn!=null&&mx!=null)
-              cell+=`<br><small style="color:var(--muted);font-size:11px">${mn.toFixed(1)}&ndash;${mx.toFixed(1)}</small>`;
-          }
-        }
-        html+=`<td ${style}>${cell}</td>`;
+        const st=cellStatus(r.cfg,kernels[ci].key);
+        const best=v!==null&&r.minV!==null&&v===r.minV;
+        const vramV=getKV(r.cfg,kernels[ci].key,'peak_vram_mib');
+        const vramStr=vramV!=null?' <span style="color:var(--muted);font-size:11px;font-weight:400">('+( vramV>=1024?(vramV/1024).toFixed(1)+'GB':vramV+'MB')+')</span>':'';
+        let cell=st||(v!==null?v.toFixed(1)+' ms'+vramStr:'&mdash;');
+        if(v!==null&&showRange){ const mn=getKV(r.cfg,kernels[ci].key,'min_ms'),mx=getKV(r.cfg,kernels[ci].key,'max_ms'); if(mn!=null&&mx!=null) cell=v.toFixed(1)+` ms${vramStr}<br><small style="color:var(--muted);font-size:11px">${mn.toFixed(1)}&ndash;${mx.toFixed(1)}</small>`; }
+        html+=`<td ${best&&!st?`style="color:${kernels[ci].color};font-weight:600"`:''} >${cell}</td>`;
       });
-      const spTxt=r.sp!==null
-        ?`<span style="color:${r.sp>=1?'#3dd68c':'#f05050'};font-weight:600">${r.sp.toFixed(1)}x</span>`
-        :'&mdash;';
-      html+=`<td>${spTxt}</td>`;
-      const bi=r.vals.indexOf(r.minV);
-      html+=`<td style="color:${bi>=0?kernels[bi].color:'var(--muted)'};font-size:13px">${bi>=0?kernels[bi].label:'&mdash;'}</td></tr>`;
+      if(showSpeedup) html+=`<td>${r.sp!==null?`<span style="color:${r.sp>=1?'#3dd68c':'#f05050'};font-weight:600">${r.sp.toFixed(1)}x</span>`:'&mdash;'}</td>`;
+      const bi=r.minV!==null?r.vals.indexOf(r.minV):-1;
+      const bestLabel=r.cfg.skip?`<span class="cell-skip">SKIP</span>`:(bi>=0?kernels[bi].label:'&mdash;');
+      const bestColor=r.cfg.skip?'inherit':(bi>=0?kernels[bi].color:'var(--muted)');
+      html+=`<td style="color:${bestColor};font-size:13px">${bestLabel}</td></tr>`;
     });
 
     // summary row
@@ -771,19 +688,15 @@ function buildTable(id,cfgs,labels){
       const sv=kernels.map(({key})=>{const a=sumVals[key];return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;});
       const sm=Math.min(...sv.filter(v=>v!==null));
       const avgSp=speedups.length?speedups.reduce((a,b)=>a+b,0)/speedups.length:null;
-      html+=`<tr style="border-top:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04)">
-        <td style="font-weight:600;color:var(--muted);font-size:12px">avg (${cfgs.length})</td>`;
-      sv.forEach((avg,ci)=>{
-        const best=avg!==null&&avg===sm;
-        html+=`<td ${best?`style="color:${kernels[ci].color};font-weight:700"`:`style="color:var(--muted)"`}>${avg!==null?avg.toFixed(1)+' ms':'&mdash;'}</td>`;
-      });
-      html+=`<td>${avgSp!==null?`<span style="color:${avgSp>=1?'#3dd68c':'#f05050'};font-weight:600">${avgSp.toFixed(1)}x</span>`:'&mdash;'}</td><td></td></tr>`;
+      html+=`<tr style="border-top:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04)"><td style="font-weight:600;color:var(--muted);font-size:12px">avg (${cfgs.length})</td>`;
+      sv.forEach((avg,ci)=>{ const best=avg!==null&&avg===sm; html+=`<td ${best?`style="color:${kernels[ci].color};font-weight:700"`:`style="color:var(--muted)"`}>${avg!==null?avg.toFixed(1)+' ms':'&mdash;'}</td>`; });
+      if(showSpeedup) html+=`<td>${avgSp!==null?`<span style="color:${avgSp>=1?'#3dd68c':'#f05050'};font-weight:600">${avgSp.toFixed(1)}x</span>`:'&mdash;'}</td>`;
+      html+=`<td></td></tr>`;
     }
   }
 
   html+='</tbody></table>';
-  const el=document.getElementById(id);
-  if(el) el.innerHTML=html;
+  const el=document.getElementById(id); if(el) el.innerHTML=html;
 }
 </script>
 </body>
