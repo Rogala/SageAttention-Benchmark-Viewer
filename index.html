@@ -253,10 +253,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="help-section">
         <div class="help-section-title">&#128013; Benchmark Script</div>
         <p>To generate your own results, download the script and run it locally:</p>
-        <a href="https://raw.githubusercontent.com/Rogala/SageAttention-Benchmark-Viewer/main/sage_bench_models.py" download="sage_bench_models.py" class="help-link help-download">&#11015; sage_bench_models.py</a>
+        <a href="https://raw.githubusercontent.com/Rogala/SageAttention-Benchmark-Viewer/main/bench_windows.py" download="bench_windows.py" class="help-link help-download">&#11015; bench_windows.py</a>
+		<a href="https://raw.githubusercontent.com/Rogala/SageAttention-Benchmark-Viewer/main/bench_linux.py" download="bench_linux.py" class="help-link help-download">&#11015; bench_linux.py</a>
         <p style="margin-top:12px">Run command:</p>
-        <div class="help-code">python sage_bench_models.py --warmup 20 --iters 100</div>
-        <p class="help-note">The script automatically saves the result as a JSON file named after your GPU (e.g. <code>RTX-5060_Ti-16GB.json</code>) in the current directory.</p>
+        <div class="help-code">python bench_windows.py --warmup 20 --iters 100<br>python3 bench_linux.py --warmup 20 --iters 100</div>
+        <p class="help-note">The script automatically saves the result as a JSON file named after your GPU (e.g. <code>5060-ti-16.json</code>) in the current directory.</p>
       </div>
       <div class="help-section">
         <div class="help-section-title">&#128228; Share Your Results</div>
@@ -270,7 +271,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 
 <script>
-const FILE_COLORS = ['#5b8af7','#3dd68c','#f5a623','#a78bfa','#f05050','#38bdf8'];
+// ── Constants ──────────────────────────────────────────────────
+const MAX_FILES = 6; // hard cap for loaded files; FILE_COLORS length must match
+const FILE_COLORS = ['#5b8af7','#3dd68c','#f5a623','#a78bfa','#f05050','#38bdf8']; // length must equal MAX_FILES
 const ALL_KERNELS = [
   {key:'sa2',     label:'SA2 auto', color:'#5b8af7'},
   {key:'sa2_fp8', label:'SA2 fp8',  color:'#a78bfa'},
@@ -287,6 +290,17 @@ const MODEL_GROUPS={
   audio:['ACE-Step-1.5'],
 };
 
+// ── HTML escape (XSS-safe insertion of file/env strings) ──────
+function escapeHtml(s){
+  if(s==null) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
 // ── Display mode ───────────────────────────────────────────────
 function getDisplayMode(){ return document.getElementById('displayMode').value; }
 
@@ -298,9 +312,10 @@ function updateDisplayMode(){
 }
 
 // ── Model dropdowns ───────────────────────────────────────────
+const GROUP_EL={image:'modelImage',video:'modelVideo',audio:'modelAudio'};
 function updateModelDropdowns(){
   ['image','video','audio'].forEach(group=>{
-    const sel=document.getElementById('model'+group.charAt(0).toUpperCase()+group.slice(1));
+    const sel=document.getElementById(GROUP_EL[group]);
     const first=sel.options[0].outerHTML; sel.innerHTML=first;
     MODEL_GROUPS[group].forEach(m=>{
       if(!models.includes(m)) return;
@@ -314,26 +329,31 @@ function onModelSelect(group,sel){
   const m=sel.value; if(!m) return;
   const idx=models.indexOf(m); if(idx>=0) switchTab(idx);
   ['image','video','audio'].filter(g=>g!==group).forEach(g=>{
-    document.getElementById('model'+g.charAt(0).toUpperCase()+g.slice(1)).selectedIndex=0;
+    document.getElementById(GROUP_EL[g]).selectedIndex=0;
   });
 }
 
 // ── GitHub ────────────────────────────────────────────────────
-const GH={user:'Rogala',repo:'SageAttention-Benchmark-Viewer',folder:'results',ref:'5060-ti-16_Ref.json'};
+const GH={user:'Rogala',repo:'SageAttention-Benchmark-Viewer',folder:'results',defaultFile:'5060-ti-16_Ref.json'};
 const GH_RAW=`https://raw.githubusercontent.com/${GH.user}/${GH.repo}/main/${GH.folder}`;
 const GH_API=`https://api.github.com/repos/${GH.user}/${GH.repo}/contents/${GH.folder}`;
 
+// ── GPU group regex ──────────────────────────────────────────
+// extended to cover newer NVIDIA hardware:
+//   Data Center: H100/H200, B100/B200, A100, A40, L4/L40/L40S, V100, P100
+//   Workstation: RTX PRO 6000, A6000/A5000/A4500/A4000, 6000/5000/4500/4000
 const GPU_GROUPS={
-  gpuDataCenter:  /^(H100|A100|A40|L40|V100|P100)/i,
-  gpuWorkstation: /^RTX[-_\s]?(6000|5000|4500|4000|A6000|A5000|A4000)/i,
-  gpuBlackwell:   /^RTX[-_\s]?50/i,
-  gpuAda:         /^RTX[-_\s]?40/i,
-  gpuAmpere:      /^RTX[-_\s]?30/i,
-  gpuTuring:      /^(RTX[-_\s]?20|GTX[-_\s]?16)/i,
+  gpuDataCenter:  /^(h100|h200|a100|a40|b100|b200|l4|l40|v100|p100)/i,
+  gpuWorkstation: /^(rtx-?pro|a6000|a5000|a4500|a4000|6000|5000|4500|4000)/i,
+  gpuBlackwell:   /^50\d\d/i,
+  gpuAda:         /^40\d\d/i,
+  gpuAmpere:      /^30\d\d/i,
+  gpuTuring:      /^(20\d\d|16\d\d)/i,
 };
 
-function fileToLabel(n){ return n.replace(/\.json$/i,'').replace(/[-_]/g,' '); }
-function fileGroup(n){ const g=n.replace(/\.json$/i,''); for(const [id,re] of Object.entries(GPU_GROUPS)) if(re.test(g)) return id; return null; }
+function stripJson(n){ return n.replace(/\.json$/i,''); }
+function fileToLabel(n){ return stripJson(n).replace(/[-_]/g,' '); }
+function fileGroup(n){ const g=stripJson(n); for(const [id,re] of Object.entries(GPU_GROUPS)) if(re.test(g)) return id; return null; }
 function populateDropdowns(list){
   for(const id of Object.keys(GPU_GROUPS)){ const s=document.getElementById(id); s.innerHTML=s.options[0].outerHTML; }
   list.forEach(f=>{ const gid=fileGroup(f.name); if(!gid) return; const o=document.createElement('option'); o.value=f.download_url; o.textContent=fileToLabel(f.name); document.getElementById(gid).appendChild(o); });
@@ -341,11 +361,11 @@ function populateDropdowns(list){
 async function onGpuSelect(sel){
   const url=sel.value; if(!url){sel.selectedIndex=0;return;}
   for(const id of Object.keys(GPU_GROUPS)) if(document.getElementById(id)!==sel) document.getElementById(id).selectedIndex=0;
-  await loadFromUrl(url,fileToLabel(sel.options[sel.selectedIndex].text));
+  await loadFromUrl(url,sel.options[sel.selectedIndex].text);
   sel.selectedIndex=0;
 }
 async function loadFromUrl(url,label){
-  if(files.length>=6){alert('Maximum 6 files. Remove one first.');return;}
+  if(files.length>=MAX_FILES){alert(`Maximum ${MAX_FILES} files. Remove one first.`);return;}
   const name=label||url.split('/').pop().replace(/\.json$/i,'');
   if(files.find(f=>f.name===name)) return;
   try{
@@ -356,17 +376,23 @@ async function loadFromUrl(url,label){
   }catch(e){ console.error(e); alert(`Could not load:\n${url}\n\n${e.message}`); }
 }
 async function init(){
-  await loadFromUrl(`${GH_RAW}/${GH.ref}`,GH.ref.replace(/\.json$/i,''));
+  // graceful handling — never block UI even if reference file or community list fail
+  try{
+    await loadFromUrl(`${GH_RAW}/${GH.defaultFile}`,GH.defaultFile.replace(/\.json$/i,''));
+  }catch(e){
+    console.warn('Reference benchmark unavailable:',e);
+    document.getElementById('content').innerHTML='<div class="notice">Reference benchmark unavailable. Click <strong>+ Add file</strong> to load your own JSON.</div>';
+  }
   try{
     const resp=await fetch(GH_API); if(!resp.ok) throw new Error();
     const list=await resp.json();
     populateDropdowns(list.filter(f=>f.name.endsWith('.json')&&!f.name.includes('Ref')));
-  }catch(e){ console.warn('Community list unavailable'); }
+  }catch(e){ console.warn('Community list unavailable'); document.querySelector('.gpu-bar-sub').textContent='Community list unavailable — load files manually.'; }
 }
 init();
 
-let _lastWidth=window.innerWidth;
-window.addEventListener('resize',()=>{ const w=window.innerWidth; if(w===_lastWidth) return; _lastWidth=w; clearTimeout(window._rt); window._rt=setTimeout(renderAll,200); });
+let _lastWidth=window.innerWidth, _resizeTimer;
+window.addEventListener('resize',()=>{ const w=window.innerWidth; if(w===_lastWidth) return; _lastWidth=w; clearTimeout(_resizeTimer); _resizeTimer=setTimeout(renderAll,200); });
 
 // ── Helpers ───────────────────────────────────────────────────
 function getV(cfg,key,field='median_ms'){ const v=cfg[key]; if(!v||v.error||v.skip||cfg.skip) return null; return v[field]!=null?v[field]:null; }
@@ -379,9 +405,11 @@ function toggleKernel(key){
   document.getElementById(ids[key]).classList.toggle('active');
   renderAll();
 }
-function addSlot(){ if(files.length>=6) return; document.getElementById('fileIn').value=''; document.getElementById('fileIn').click(); }
+function addSlot(){ if(files.length>=MAX_FILES) return; document.getElementById('fileIn').value=''; document.getElementById('fileIn').click(); }
 function onFileChosen(inp){
   const f=inp.files[0]; if(!f) return;
+  // enforce file limit also on direct file chooser path
+  if(files.length>=MAX_FILES){ alert(`Maximum ${MAX_FILES} files. Remove one first.`); inp.value=''; return; }
   const r=new FileReader();
   r.onload=e=>{ try{ const data=JSON.parse(e.target.result); const idx=files.length; files.push({data,name:f.name.replace(/\.json$/i,''),color:FILE_COLORS[idx%FILE_COLORS.length],ev:data.env||{}}); updateModels();renderSlots();renderAll(); }catch(ex){alert('JSON error: '+ex);} };
   r.readAsText(f);
@@ -389,12 +417,21 @@ function onFileChosen(inp){
 function removeFile(idx){
   Object.keys(chartReg).forEach(id=>{ if(id.includes(`_f${idx}`)){ chartReg[id].destroy(); delete chartReg[id]; } });
   files.splice(idx,1); files.forEach((f,i)=>f.color=FILE_COLORS[i%FILE_COLORS.length]);
-  updateModels();renderSlots();renderAll();
+  updateModels();
+  // clamp activeTab so it never points outside the current models list
+  if(activeTab>=models.length) activeTab=Math.max(0,models.length-1);
+  renderSlots();renderAll();
 }
 function renderSlots(){
   const el=document.getElementById('slots'); el.innerHTML='';
-  files.forEach((f,i)=>{ const d=document.createElement('div'); d.className='slot loaded'; d.style.borderColor=f.color; d.innerHTML=`<span class="dot" style="background:${f.color}"></span><span class="sname" style="color:${f.color}">${f.name}</span><span class="sclose" onclick="removeFile(${i});event.stopPropagation()">&#10005;</span>`; el.appendChild(d); });
-  document.getElementById('addBtn').style.display=files.length>=6?'none':'';
+  files.forEach((f,i)=>{
+    const d=document.createElement('div'); d.className='slot loaded'; d.style.borderColor=f.color;
+    // escape file name to prevent XSS via crafted JSON filename
+    const safeName=escapeHtml(f.name);
+    d.innerHTML=`<span class="dot" style="background:${f.color}"></span><span class="sname" style="color:${f.color}">${safeName}</span><span class="sclose" onclick="removeFile(${i});event.stopPropagation()">&#10005;</span>`;
+    el.appendChild(d);
+  });
+  document.getElementById('addBtn').style.display=files.length>=MAX_FILES?'none':'';
 }
 function updateModels(){
   const seen=new Set(); models=[];
@@ -443,6 +480,8 @@ function renderAll(){
   // sync hidden nav buttons
   const nav=document.getElementById('nav'); nav.innerHTML='';
   models.forEach((m,i)=>{ const btn=document.createElement('div'); btn.className='nav-btn'+(i===activeTab?' active':''); btn.textContent=m; btn.onclick=()=>switchTab(i); nav.appendChild(btn); });
+  // ensure activeTab is within bounds even when models list shrinks
+  if(activeTab>=models.length) activeTab=Math.max(0,models.length-1);
   updateModelDropdowns();
 
   const content=document.getElementById('content'); content.innerHTML='';
@@ -458,6 +497,9 @@ function renderAll(){
 
     if(mode==='all'||files.length<2){
       // ── Normal mode: each file = one block with all 3 charts + table ──
+      // NOTE: when files.length<2 the displayMode dropdown is disabled and forced
+      // to 'all', so 'table'/'latency'/'tflops'/'speedup' modes can only fire
+      // when there are 2+ files.
       files.forEach((f,fi)=>{
         const cfgsRaw=(modelMap[model]&&modelMap[model][fi])||[]; if(!cfgsRaw.length) return;
         const cfgMap=Object.fromEntries(cfgsRaw.map(c=>[c.label,c]));
@@ -469,10 +511,12 @@ function renderAll(){
 
         const block=document.createElement('div');
         block.className='file-block';
+        // every dynamic string from JSON is escaped to prevent XSS
+        const detail=`${escapeHtml(ev.gpu||'')} ${ev.vram_gb?escapeHtml(ev.vram_gb+'GB'):''} ${ev.compute_cap?'· '+escapeHtml(ev.compute_cap):''} · py${escapeHtml(ev.python||'?')} · torch ${escapeHtml(ev.torch||'?')} · SA2 ${escapeHtml(ev.sageattention||'?')} · SA3 ${escapeHtml(ev.sageattn3||'?')}`;
         block.innerHTML=`
           <div class="file-header">
-            <span class="file-badge" style="background:${f.color}28;color:${f.color}">${f.name}</span>
-            <span class="file-detail">${ev.gpu||''} ${ev.vram_gb?ev.vram_gb+'GB':''} ${ev.compute_cap?'· '+ev.compute_cap:''} · py${ev.python||'?'} · torch ${ev.torch||'?'} · SA2 ${ev.sageattention||'?'} · SA3 ${ev.sageattn3||'?'}</span>
+            <span class="file-badge" style="background:${f.color}28;color:${f.color}">${escapeHtml(f.name)}</span>
+            <span class="file-detail">${detail}</span>
           </div>
           <div class="charts-row">
             <div class="card"><div class="card-title">Latency ms (lower is better)</div><div class="chart-wrap" style="height:${h}px"><canvas id="${latId}"></canvas></div></div>
@@ -484,7 +528,8 @@ function renderAll(){
         sec.appendChild(block);
 
         if(isActive){
-          ;(function(a,b,c,d,cf,sl){ setTimeout(()=>{ buildLatency(a,cf,sl); buildTflops(b,cf,sl); buildSpeedup(c,cf,sl); buildTable(d,cf,sl); },0); })(latId,tflId,spdId,tblId,cfgs,shortLabels);
+          const [_a,_b,_c,_d,_cf,_sl]=[latId,tflId,spdId,tblId,cfgs,shortLabels];
+          setTimeout(()=>{ buildLatency(_a,_cf,_sl); buildTflops(_b,_cf,_sl); buildSpeedup(_c,_cf,_sl); buildTable(_d,_cf,_sl); },0);
         } else {
           block.dataset.pendingBlock='1'; block.dataset.type='normal';
           block.dataset.lat=latId; block.dataset.tfl=tflId; block.dataset.spd=spdId; block.dataset.tid=tblId;
@@ -496,12 +541,6 @@ function renderAll(){
       const compareSec=document.createElement('div');
       compareSec.className='compare-section';
 
-      const chartTypes=[];
-      if(mode==='all'||mode==='latency') chartTypes.push({key:'latency',title:'Latency ms (lower is better)',fn:'buildLatency'});
-      if(mode==='all'||mode==='tflops')  chartTypes.push({key:'tflops', title:'TFLOPS (higher is better)',   fn:'buildTflops'});
-      if(mode==='all'||mode==='speedup') chartTypes.push({key:'speedup',title:'Speedup vs SDPA (higher is better)', fn:'buildSpeedup'});
-
-      // filter to only the selected type
       const selectedTypes = mode==='all'
         ? [{key:'latency',title:'Latency ms (lower is better)',fn:'buildLatency'},{key:'tflops',title:'TFLOPS (higher is better)',fn:'buildTflops'},{key:'speedup',title:'Speedup vs SDPA (higher is better)',fn:'buildSpeedup'}]
         : mode==='latency' ? [{key:'latency',title:'Latency ms (lower is better)',fn:'buildLatency'}]
@@ -525,13 +564,16 @@ function renderAll(){
 
           const card=document.createElement('div');
           card.className='card';
-          card.innerHTML=`<div class="compare-card-label" style="color:${f.color}">${shortName(f.name)}</div><div class="chart-wrap" style="height:${h}px"><canvas id="${cid}"></canvas></div>`;
+          // escape file name in compare card label
+          card.innerHTML=`<div class="compare-card-label" style="color:${f.color}">${escapeHtml(shortName(f.name))}</div><div class="chart-wrap" style="height:${h}px"><canvas id="${cid}"></canvas></div>`;
           row.appendChild(card);
 
           if(isActive){
-            ;(function(id,cf,sl,f){ setTimeout(()=>{ if(f==='buildLatency') buildLatency(id,cf,sl); else if(f==='buildTflops') buildTflops(id,cf,sl); else buildSpeedup(id,cf,sl); },0); })(cid,cfgs,shortLabels,fn);
+            const [_id,_cf,_sl,_fn]=[cid,cfgs,shortLabels,fn];
+            setTimeout(()=>{ if(_fn==='buildLatency') buildLatency(_id,_cf,_sl); else if(_fn==='buildTflops') buildTflops(_id,_cf,_sl); else buildSpeedup(_id,_cf,_sl); },0);
           } else {
-            card.dataset.pendingBlock='1'; card.dataset.type=`compare-${key.slice(0,3)}`; card.dataset.id=cid;
+            const typeMap={latency:'compare-lat',tflops:'compare-tfl',speedup:'compare-spd'};
+            card.dataset.pendingBlock='1'; card.dataset.type=typeMap[key]; card.dataset.id=cid;
             card.dataset.cfgs=JSON.stringify(cfgs); card.dataset.labels=JSON.stringify(shortLabels);
           }
         });
@@ -555,11 +597,13 @@ function renderAll(){
 
           const card=document.createElement('div');
           card.className='card';
-          card.innerHTML=`<div class="compare-card-label" style="color:${f.color}">${shortName(f.name)}</div><div class="table-wrap" id="${tid}"></div>`;
+          // escape file name in compare table label
+          card.innerHTML=`<div class="compare-card-label" style="color:${f.color}">${escapeHtml(shortName(f.name))}</div><div class="table-wrap" id="${tid}"></div>`;
           tblRows.appendChild(card);
 
           if(isActive){
-            ;(function(id,cf,sl){ setTimeout(()=>buildTable(id,cf,sl),0); })(tid,cfgs,shortLabels);
+            const [_id,_cf,_sl]=[tid,cfgs,shortLabels];
+            setTimeout(()=>buildTable(_id,_cf,_sl),0);
           } else {
             card.dataset.pendingBlock='1'; card.dataset.type='compare-tbl'; card.dataset.id=tid;
             card.dataset.cfgs=JSON.stringify(cfgs); card.dataset.labels=JSON.stringify(shortLabels);
@@ -582,30 +626,29 @@ function chartParams(nCfgs){
   const isWide=window.innerWidth>=2001;
   const flipAxis=isMobile||isWide;
   const h=flipAxis
-    ? Math.max(200, Math.min(nCfgs*42+60, 500))
-    : Math.max(180, Math.min(nCfgs*62+50, 1100));
+    ? Math.max(200, Math.min(nCfgs*36+60, 500))
+    : Math.max(180, Math.min(nCfgs*56+50, 1100));
   return {h,flipAxis,isWide};
 }
 
 // ── Chart base ────────────────────────────────────────────────
-const gOpts={
-  indexAxis:'y',responsive:true,maintainAspectRatio:false,
-  plugins:{legend:{display:false}},
-  layout:{padding:{top:2,right:2,bottom:2,left:2}},
-  scales:{
-    x:{ticks:{color:'#9aa0b8',font:{size:11}},grid:{color:'rgba(255,255,255,.06)'}},
-    y:{ticks:{color:'#e8eaf0',font:{size:11}},grid:{color:'rgba(255,255,255,.03)'}},
-  }
-};
 function makeOpts(flipAxis,isWide){
-  const o=JSON.parse(JSON.stringify(gOpts));
-  o.indexAxis=flipAxis?'x':'y';
-  if(flipAxis){ o.scales.x.ticks.maxRotation=45; o.scales.x.ticks.font={size:isWide?11:10}; o.scales.y.ticks.font={size:isWide?12:11}; }
-  return o;
+  return {
+    indexAxis: flipAxis?'x':'y',
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    layout:{padding:{top:2,right:2,bottom:2,left:2}},
+    scales:{
+      x:{ticks:{color:'#9aa0b8',font:{size:flipAxis?(isWide?11:10):11},maxRotation:flipAxis?45:undefined},grid:{color:'rgba(255,255,255,.06)'}},
+      y:{ticks:{color:flipAxis?'#e8eaf0':'#9aa0b8',font:{size:flipAxis?(isWide?12:11):11}},grid:{color:'rgba(255,255,255,.03)'}},
+    }
+  };
 }
 const LOG_TICKS=[0.1,0.2,0.5,1,2,5,10,20,50,100,200,500,1000];
 
 function buildLatency(id,cfgs,labels){
+  // race-condition guard: canvas may have been removed by a fast tab switch
+  const canvas=document.getElementById(id); if(!canvas) return;
   const showRange=document.getElementById('showRange').value==='minmax';
   const kernels=activeKernelList();
   const {flipAxis,isWide}=chartParams(cfgs.length);
@@ -622,10 +665,12 @@ function buildLatency(id,cfgs,labels){
   o.plugins.datalabels={display:ctx=>ctx.dataset.data[ctx.dataIndex]!==null&&!ctx.dataset.label.includes('range'),formatter:v=>Array.isArray(v)?'':(v!=null?v.toFixed(1):''),color:'#e8eaf0',font:{size:10,weight:'600'},anchor:'end',align:flipAxis?'top':'right',offset:2,clip:false};
   o.layout={padding:{top:14,right:flipAxis?0:32,bottom:2,left:2}};
   if(chartReg[id]) chartReg[id].destroy();
-  chartReg[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},options:o});
+  chartReg[id]=new Chart(canvas,{type:'bar',data:{labels,datasets},options:o});
 }
 
 function buildTflops(id,cfgs,labels){
+  // race-condition guard
+  const canvas=document.getElementById(id); if(!canvas) return;
   const kernels=activeKernelList();
   const {flipAxis,isWide}=chartParams(cfgs.length);
   const datasets=kernels.map(({key,label,color})=>{ const data=cfgs.map(c=>getKV(c,key,'tflops')); if(!data.some(v=>v!==null)) return null; return {label,data:data.map(v=>v??null),backgroundColor:color+'99',borderColor:color,borderWidth:1,skipNull:true}; }).filter(Boolean);
@@ -635,10 +680,12 @@ function buildTflops(id,cfgs,labels){
   else o.scales.x.ticks.callback=v=>v!=null?v.toFixed(0)+'T':'';
   o.plugins.datalabels={display:false};
   if(chartReg[id]) chartReg[id].destroy();
-  chartReg[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},options:o});
+  chartReg[id]=new Chart(canvas,{type:'bar',data:{labels,datasets},options:o});
 }
 
 function buildSpeedup(id,cfgs,labels){
+  // race-condition guard
+  const canvas=document.getElementById(id); if(!canvas) return;
   const kernels=activeKernelList().filter(k=>k.key!=='sdpa');
   const {flipAxis,isWide}=chartParams(cfgs.length);
   const datasets=kernels.map(({key,label,color})=>{ const data=cfgs.map(c=>{ const s=getV(c,'sdpa'),k=getV(c,key); return(!s||!k||k===0)?null:parseFloat((s/k).toFixed(1)); }); if(!data.some(v=>v!==null)) return null; return {label,data,backgroundColor:color+'99',borderColor:color,borderWidth:1}; }).filter(Boolean);
@@ -648,22 +695,24 @@ function buildSpeedup(id,cfgs,labels){
   if(flipAxis){ o.scales.y.ticks.callback=v=>v!=null?v.toFixed(1)+'x':''; o.scales.y.ticks.font={size:isWide?12:11}; }
   else o.scales.x.ticks.callback=v=>v!=null?v.toFixed(1)+'x':'';
   if(chartReg[id]) chartReg[id].destroy();
-  chartReg[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},options:o});
+  chartReg[id]=new Chart(canvas,{type:'bar',data:{labels,datasets},options:o});
 }
 
 // ── Table ─────────────────────────────────────────────────────
 function cellStatus(cfg,key){
-  if(cfg.skip) return `<span class="cell-skip" title="${cfg.skip}">SKIP</span>`;
-  const v=cfg[key]; if(!v) return null;
-  if(v.skip) return `<span class="cell-skip" title="${v.skip}">SKIP</span>`;
+  if(cfg.skip) return `<span class="cell-skip" title="${escapeHtml(cfg.skip)}">SKIP</span>`;
+  const v=cfg[key]; if(v==null) return null;
+  if(v.skip) return `<span class="cell-skip" title="${escapeHtml(v.skip)}">SKIP</span>`;
   if(v.error){
-    if(v.error.includes('OutOfMemoryError')||v.error.includes('out of memory')) return `<span class="cell-oom" title="${v.error}">OOM</span>`;
-    return `<span class="cell-err" title="${v.error}">&mdash; &#9432;</span>`;
+    if(v.error.includes('OutOfMemoryError')||v.error.includes('out of memory')) return `<span class="cell-oom" title="${escapeHtml(v.error)}">OOM</span>`;
+    return `<span class="cell-err" title="${escapeHtml(v.error)}">&mdash; &#9432;</span>`;
   }
   return null;
 }
 
 function buildTable(id,cfgs,labels){
+  // race-condition guard
+  const tableEl=document.getElementById(id); if(!tableEl) return;
   const kernels=activeKernelList();
   const showRange=document.getElementById('showRange').value==='minmax';
   const isMobile=window.innerWidth<=600;
@@ -687,7 +736,8 @@ function buildTable(id,cfgs,labels){
     const sv=kernels.map(({key})=>{const a=sumVals[key];return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;});
     const sm=sv.filter(v=>v!==null).length?Math.min(...sv.filter(v=>v!==null)):null;
     const avgSp=speedups.length?speedups.reduce((a,b)=>a+b,0)/speedups.length:null;
-    html+=`<table><thead><tr><th>Kernel</th>${rows.map((r,i)=>`<th style="font-size:11px;max-width:90px;white-space:normal;line-height:1.3">${labels[i]}</th>`).join('')}${rows.length>1?`<th style="color:var(--muted);font-size:11px">avg</th>`:''}</tr></thead><tbody>`;
+    // labels are derived from config labels — escape to be safe
+    html+=`<table><thead><tr><th>Kernel</th>${rows.map((r,i)=>`<th style="font-size:11px;max-width:90px;white-space:normal;line-height:1.3">${escapeHtml(labels[i])}</th>`).join('')}${rows.length>1?`<th style="color:var(--muted);font-size:11px">avg</th>`:''}</tr></thead><tbody>`;
     kernels.forEach(({key,label,color},ci)=>{
       html+=`<tr><td style="color:${color};font-weight:600;white-space:nowrap">${label}</td>`;
       rows.forEach(r=>{
@@ -715,7 +765,8 @@ function buildTable(id,cfgs,labels){
   } else {
     html+=`<table><thead><tr><th>Config</th>${kernels.map(c=>`<th style="color:${c.color}">${c.label} <span style="color:var(--muted);font-weight:400;font-size:11px">(VRAM)</span></th>`).join('')}${showSpeedup?'<th>SA2 vs SDPA</th>':''}<th>Best</th></tr></thead><tbody>`;
     rows.forEach((r,i)=>{
-      html+=`<tr><td>${labels[i]}</td>`;
+      // escape config label before insertion
+      html+=`<tr><td>${escapeHtml(labels[i])}</td>`;
       r.vals.forEach((v,ci)=>{
         const st=cellStatus(r.cfg,kernels[ci].key); const best=v!==null&&r.minV!==null&&v===r.minV;
         const vramV=getKV(r.cfg,kernels[ci].key,'peak_vram_mib');
@@ -739,7 +790,7 @@ function buildTable(id,cfgs,labels){
     }
   }
   html+='</tbody></table>';
-  const el=document.getElementById(id); if(el) el.innerHTML=html;
+  tableEl.innerHTML=html;
 }
 </script>
 </body>
