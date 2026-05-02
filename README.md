@@ -35,6 +35,9 @@ Four kernel variants are compared against each model's attention shapes:
 
 ---
 
+<img width="1920" height="871" alt="Знімок екрана (55)" src="https://github.com/user-attachments/assets/ae56492f-966b-4747-b51e-da2d51ef5584" />
+
+---
 ## Covered models
 
 **Image:** SDXL-1.0, SD3.5-Large, Flux.1-Dev (Kontext / Krea), Flux.2-Dev, Flux.2-Dev Klein 9B, Z-Image / Z-Image Turbo, Qwen-Image-2512, Qwen-Image-Edit-2511, ERNIE-Image / ERNIE-Image Turbo
