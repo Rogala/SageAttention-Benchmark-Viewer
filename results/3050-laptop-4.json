@@ -1,0 +1,1351 @@
+{
+  "env": {
+    "python": "3.14.4",
+    "torch": "2.11.0+cu130",
+    "cuda_rt": "13.0",
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "vram_gb": 4,
+    "compute_cap": "sm_86",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "sageattention": "2.2.0+cu130torch2.9.0andhigher.post4",
+    "sageattn3": "n/a",
+    "triton": "3.5.0"
+  },
+  "configs": [
+    {
+      "label": "[SDXL-1.0] main-attn 1024x1024 fp16",
+      "batch": 1,
+      "heads": 10,
+      "seq": 4096,
+      "head_dim": 64,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 2.5235,
+        "median_ms": 2.5106,
+        "min_ms": 2.4928,
+        "max_ms": 2.6319,
+        "stdev_ms": 0.0409,
+        "peak_vram_mib": 115,
+        "tflops": 17.107
+      },
+      "sdpa": {
+        "mean_ms": 4.003,
+        "median_ms": 3.994,
+        "min_ms": 3.9833,
+        "max_ms": 4.0555,
+        "stdev_ms": 0.0256,
+        "peak_vram_mib": 115,
+        "tflops": 10.754
+      }
+    },
+    {
+      "label": "[SDXL-1.0] mid-attn  1024x1024 fp16",
+      "batch": 1,
+      "heads": 20,
+      "seq": 1024,
+      "head_dim": 64,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 0.5222,
+        "median_ms": 0.4963,
+        "min_ms": 0.4364,
+        "max_ms": 0.6806,
+        "stdev_ms": 0.0831,
+        "peak_vram_mib": 101,
+        "tflops": 10.817
+      },
+      "sdpa": {
+        "mean_ms": 0.517,
+        "median_ms": 0.5075,
+        "min_ms": 0.4987,
+        "max_ms": 0.554,
+        "stdev_ms": 0.0201,
+        "peak_vram_mib": 101,
+        "tflops": 10.579
+      }
+    },
+    {
+      "label": "[SDXL-1.0] main-attn 1344x768  fp16",
+      "batch": 1,
+      "heads": 10,
+      "seq": 4032,
+      "head_dim": 64,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 2.3135,
+        "median_ms": 2.3047,
+        "min_ms": 2.2522,
+        "max_ms": 2.4385,
+        "stdev_ms": 0.0595,
+        "peak_vram_mib": 115,
+        "tflops": 18.057
+      },
+      "sdpa": {
+        "mean_ms": 3.5102,
+        "median_ms": 3.4888,
+        "min_ms": 3.4564,
+        "max_ms": 3.6221,
+        "stdev_ms": 0.059,
+        "peak_vram_mib": 115,
+        "tflops": 11.929
+      }
+    },
+    {
+      "label": "[SDXL-1.0] mid-attn  1344x768  fp16",
+      "batch": 1,
+      "heads": 20,
+      "seq": 1008,
+      "head_dim": 64,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 0.5615,
+        "median_ms": 0.5555,
+        "min_ms": 0.4123,
+        "max_ms": 0.7582,
+        "stdev_ms": 0.0967,
+        "peak_vram_mib": 101,
+        "tflops": 9.364
+      },
+      "sdpa": {
+        "mean_ms": 0.52,
+        "median_ms": 0.5047,
+        "min_ms": 0.4982,
+        "max_ms": 0.6144,
+        "stdev_ms": 0.037,
+        "peak_vram_mib": 101,
+        "tflops": 10.309
+      }
+    },
+    {
+      "label": "[SD3.5-Large] 1024x1024 fp16",
+      "batch": 1,
+      "heads": 38,
+      "seq": 4250,
+      "head_dim": 64,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 9.1295,
+        "median_ms": 9.1329,
+        "min_ms": 9.0804,
+        "max_ms": 9.1907,
+        "stdev_ms": 0.0405,
+        "peak_vram_mib": 195,
+        "tflops": 19.239
+      },
+      "sdpa": {
+        "mean_ms": 15.2407,
+        "median_ms": 15.2286,
+        "min_ms": 15.1701,
+        "max_ms": 15.3728,
+        "stdev_ms": 0.0619,
+        "peak_vram_mib": 195,
+        "tflops": 11.538
+      }
+    },
+    {
+      "label": "[SD3.5-Large] 1344x768  fp16",
+      "batch": 1,
+      "heads": 38,
+      "seq": 4186,
+      "head_dim": 64,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 8.8509,
+        "median_ms": 8.8271,
+        "min_ms": 8.781,
+        "max_ms": 8.9713,
+        "stdev_ms": 0.0627,
+        "peak_vram_mib": 195,
+        "tflops": 19.311
+      },
+      "sdpa": {
+        "mean_ms": 14.8004,
+        "median_ms": 14.7753,
+        "min_ms": 14.7471,
+        "max_ms": 14.8724,
+        "stdev_ms": 0.0521,
+        "peak_vram_mib": 195,
+        "tflops": 11.537
+      }
+    },
+    {
+      "label": "[SD3.5-Large] 1152x1152 fp16",
+      "batch": 1,
+      "heads": 38,
+      "seq": 5338,
+      "head_dim": 64,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 13.9743,
+        "median_ms": 13.9661,
+        "min_ms": 13.8953,
+        "max_ms": 14.0583,
+        "stdev_ms": 0.0572,
+        "peak_vram_mib": 213,
+        "tflops": 19.848
+      },
+      "sdpa": {
+        "mean_ms": 24.0261,
+        "median_ms": 24.0165,
+        "min_ms": 23.9287,
+        "max_ms": 24.2662,
+        "stdev_ms": 0.1022,
+        "peak_vram_mib": 213,
+        "tflops": 11.542
+      }
+    },
+    {
+      "label": "[SD3.5-Large] 1536x832  fp16",
+      "batch": 1,
+      "heads": 38,
+      "seq": 5146,
+      "head_dim": 64,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 13.3384,
+        "median_ms": 13.283,
+        "min_ms": 13.2304,
+        "max_ms": 13.6359,
+        "stdev_ms": 0.1371,
+        "peak_vram_mib": 203,
+        "tflops": 19.394
+      },
+      "sdpa": {
+        "mean_ms": 22.2668,
+        "median_ms": 22.2676,
+        "min_ms": 22.1668,
+        "max_ms": 22.4461,
+        "stdev_ms": 0.082,
+        "peak_vram_mib": 203,
+        "tflops": 11.569
+      }
+    },
+    {
+      "label": "[Flux.1-Dev (Kontext, Krea)] 1024x1024 bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 4352,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 11.038,
+        "median_ms": 11.0206,
+        "min_ms": 10.9767,
+        "max_ms": 11.26,
+        "stdev_ms": 0.0834,
+        "peak_vram_mib": 251,
+        "tflops": 21.118
+      },
+      "sdpa": {
+        "mean_ms": 24.4882,
+        "median_ms": 24.4791,
+        "min_ms": 24.4157,
+        "max_ms": 24.5681,
+        "stdev_ms": 0.0493,
+        "peak_vram_mib": 251,
+        "tflops": 9.507
+      }
+    },
+    {
+      "label": "[Flux.1-Dev (Kontext, Krea)] 1344x768  bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 4288,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 10.8984,
+        "median_ms": 10.8819,
+        "min_ms": 10.8129,
+        "max_ms": 11.1611,
+        "stdev_ms": 0.1018,
+        "peak_vram_mib": 251,
+        "tflops": 20.763
+      },
+      "sdpa": {
+        "mean_ms": 24.1365,
+        "median_ms": 24.1332,
+        "min_ms": 24.0612,
+        "max_ms": 24.1916,
+        "stdev_ms": 0.0408,
+        "peak_vram_mib": 251,
+        "tflops": 9.362
+      }
+    },
+    {
+      "label": "[Flux.1-Dev (Kontext, Krea)] 1216x1216 bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 6032,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 20.8723,
+        "median_ms": 20.8483,
+        "min_ms": 20.7841,
+        "max_ms": 21.1029,
+        "stdev_ms": 0.0923,
+        "peak_vram_mib": 309,
+        "tflops": 21.445
+      },
+      "sdpa": {
+        "mean_ms": 48.0214,
+        "median_ms": 48.0122,
+        "min_ms": 47.9714,
+        "max_ms": 48.075,
+        "stdev_ms": 0.0334,
+        "peak_vram_mib": 309,
+        "tflops": 9.312
+      }
+    },
+    {
+      "label": "[Flux.1-Dev (Kontext, Krea)] 1664x896  bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 6080,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 20.9305,
+        "median_ms": 20.9294,
+        "min_ms": 20.8785,
+        "max_ms": 20.9911,
+        "stdev_ms": 0.0462,
+        "peak_vram_mib": 309,
+        "tflops": 21.704
+      },
+      "sdpa": {
+        "mean_ms": 48.0848,
+        "median_ms": 48.0802,
+        "min_ms": 48.027,
+        "max_ms": 48.1352,
+        "stdev_ms": 0.0296,
+        "peak_vram_mib": 309,
+        "tflops": 9.448
+      }
+    },
+    {
+      "label": "[Flux.2-Dev] 1024x1024 bf16",
+      "batch": 1,
+      "heads": 48,
+      "seq": 4608,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 24.5206,
+        "median_ms": 24.5142,
+        "min_ms": 24.4215,
+        "max_ms": 24.659,
+        "stdev_ms": 0.0742,
+        "peak_vram_mib": 423,
+        "tflops": 21.287
+      },
+      "sdpa": {
+        "mean_ms": 54.7551,
+        "median_ms": 54.7512,
+        "min_ms": 54.6925,
+        "max_ms": 54.8549,
+        "stdev_ms": 0.0433,
+        "peak_vram_mib": 423,
+        "tflops": 9.531
+      }
+    },
+    {
+      "label": "[Flux.2-Dev] 1344x768  bf16",
+      "batch": 1,
+      "heads": 48,
+      "seq": 4544,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 24.2646,
+        "median_ms": 24.2791,
+        "min_ms": 24.1271,
+        "max_ms": 24.3628,
+        "stdev_ms": 0.0791,
+        "peak_vram_mib": 423,
+        "tflops": 20.9
+      },
+      "sdpa": {
+        "mean_ms": 54.0358,
+        "median_ms": 54.0385,
+        "min_ms": 53.9754,
+        "max_ms": 54.0803,
+        "stdev_ms": 0.0325,
+        "peak_vram_mib": 423,
+        "tflops": 9.39
+      }
+    },
+    {
+      "label": "[Flux.2-Dev] 1440x1440 bf16",
+      "batch": 1,
+      "heads": 48,
+      "seq": 8612,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 82.218,
+        "median_ms": 82.1173,
+        "min_ms": 82.0034,
+        "max_ms": 83.2161,
+        "stdev_ms": 0.3611,
+        "peak_vram_mib": 723,
+        "tflops": 22.197
+      },
+      "sdpa": {
+        "mean_ms": 193.5777,
+        "median_ms": 193.5567,
+        "min_ms": 193.5435,
+        "max_ms": 193.6329,
+        "stdev_ms": 0.0372,
+        "peak_vram_mib": 723,
+        "tflops": 9.417
+      }
+    },
+    {
+      "label": "[Flux.2-Dev] 1920x1088 bf16",
+      "batch": 1,
+      "heads": 48,
+      "seq": 8672,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 83.0989,
+        "median_ms": 82.8995,
+        "min_ms": 82.7635,
+        "max_ms": 83.9345,
+        "stdev_ms": 0.3893,
+        "peak_vram_mib": 723,
+        "tflops": 22.294
+      },
+      "sdpa": {
+        "mean_ms": 194.9899,
+        "median_ms": 194.9855,
+        "min_ms": 194.9385,
+        "max_ms": 195.0754,
+        "stdev_ms": 0.0461,
+        "peak_vram_mib": 723,
+        "tflops": 9.479
+      }
+    },
+    {
+      "label": "[Flux.2-Dev (Klein 9B)] 1024x1024 bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 4356,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 15.448,
+        "median_ms": 15.4473,
+        "min_ms": 15.375,
+        "max_ms": 15.5193,
+        "stdev_ms": 0.0525,
+        "peak_vram_mib": 309,
+        "tflops": 20.125
+      },
+      "sdpa": {
+        "mean_ms": 34.2205,
+        "median_ms": 34.2079,
+        "min_ms": 34.1865,
+        "max_ms": 34.2747,
+        "stdev_ms": 0.0332,
+        "peak_vram_mib": 309,
+        "tflops": 9.088
+      }
+    },
+    {
+      "label": "[Flux.2-Dev (Klein 9B)] 1344x768  bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 4413,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 15.5552,
+        "median_ms": 15.5302,
+        "min_ms": 15.4449,
+        "max_ms": 15.7768,
+        "stdev_ms": 0.0992,
+        "peak_vram_mib": 309,
+        "tflops": 20.545
+      },
+      "sdpa": {
+        "mean_ms": 34.3448,
+        "median_ms": 34.3552,
+        "min_ms": 34.2782,
+        "max_ms": 34.3764,
+        "stdev_ms": 0.0322,
+        "peak_vram_mib": 309,
+        "tflops": 9.287
+      }
+    },
+    {
+      "label": "[Flux.2-Dev (Klein 9B)] 1440x1440 bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 8793,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 57.0958,
+        "median_ms": 57.0768,
+        "min_ms": 57.0145,
+        "max_ms": 57.2399,
+        "stdev_ms": 0.0606,
+        "peak_vram_mib": 521,
+        "tflops": 22.194
+      },
+      "sdpa": {
+        "mean_ms": 134.992,
+        "median_ms": 134.9881,
+        "min_ms": 134.9518,
+        "max_ms": 135.0323,
+        "stdev_ms": 0.0308,
+        "peak_vram_mib": 521,
+        "tflops": 9.384
+      }
+    },
+    {
+      "label": "[Flux.2-Dev (Klein 9B)] 1920x1088 bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 8740,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 56.7386,
+        "median_ms": 56.7089,
+        "min_ms": 56.6263,
+        "max_ms": 56.968,
+        "stdev_ms": 0.1163,
+        "peak_vram_mib": 521,
+        "tflops": 22.069
+      },
+      "sdpa": {
+        "mean_ms": 133.7408,
+        "median_ms": 133.74,
+        "min_ms": 133.7018,
+        "max_ms": 133.7777,
+        "stdev_ms": 0.0269,
+        "peak_vram_mib": 521,
+        "tflops": 9.358
+      }
+    },
+    {
+      "label": "[Z-Image (Turbo)] 1024x1024 bf16",
+      "batch": 1,
+      "heads": 30,
+      "seq": 4128,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 13.0724,
+        "median_ms": 13.0601,
+        "min_ms": 12.9929,
+        "max_ms": 13.1639,
+        "stdev_ms": 0.0586,
+        "peak_vram_mib": 287,
+        "tflops": 20.041
+      },
+      "sdpa": {
+        "mean_ms": 28.5117,
+        "median_ms": 28.5217,
+        "min_ms": 28.4317,
+        "max_ms": 28.5524,
+        "stdev_ms": 0.0395,
+        "peak_vram_mib": 287,
+        "tflops": 9.177
+      }
+    },
+    {
+      "label": "[Z-Image (Turbo)] 1344x768  bf16",
+      "batch": 1,
+      "heads": 30,
+      "seq": 4064,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 12.5146,
+        "median_ms": 12.4973,
+        "min_ms": 12.4258,
+        "max_ms": 12.7109,
+        "stdev_ms": 0.0902,
+        "peak_vram_mib": 277,
+        "tflops": 20.299
+      },
+      "sdpa": {
+        "mean_ms": 27.367,
+        "median_ms": 27.3818,
+        "min_ms": 27.298,
+        "max_ms": 27.4265,
+        "stdev_ms": 0.0418,
+        "peak_vram_mib": 277,
+        "tflops": 9.265
+      }
+    },
+    {
+      "label": "[Z-Image (Turbo)] 1280x1280 bf16",
+      "batch": 1,
+      "heads": 30,
+      "seq": 6432,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 30.1034,
+        "median_ms": 30.1139,
+        "min_ms": 29.9377,
+        "max_ms": 30.2158,
+        "stdev_ms": 0.0768,
+        "peak_vram_mib": 383,
+        "tflops": 21.102
+      },
+      "sdpa": {
+        "mean_ms": 68.8004,
+        "median_ms": 68.8026,
+        "min_ms": 68.7698,
+        "max_ms": 68.8309,
+        "stdev_ms": 0.0222,
+        "peak_vram_mib": 383,
+        "tflops": 9.236
+      }
+    },
+    {
+      "label": "[Z-Image (Turbo)] 1600x896  bf16",
+      "batch": 1,
+      "heads": 30,
+      "seq": 5632,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 22.9983,
+        "median_ms": 22.9667,
+        "min_ms": 22.9194,
+        "max_ms": 23.2032,
+        "stdev_ms": 0.0981,
+        "peak_vram_mib": 349,
+        "tflops": 21.214
+      },
+      "sdpa": {
+        "mean_ms": 51.8831,
+        "median_ms": 51.8596,
+        "min_ms": 51.8352,
+        "max_ms": 52.0139,
+        "stdev_ms": 0.0609,
+        "peak_vram_mib": 349,
+        "tflops": 9.395
+      }
+    },
+    {
+      "label": "[Qwen-Image-2512] 1328x1328 bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 6978,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 28.1774,
+        "median_ms": 28.1552,
+        "min_ms": 28.0933,
+        "max_ms": 28.3654,
+        "stdev_ms": 0.0835,
+        "peak_vram_mib": 347,
+        "tflops": 21.251
+      },
+      "sdpa": {
+        "mean_ms": 64.8004,
+        "median_ms": 64.7903,
+        "min_ms": 64.7559,
+        "max_ms": 64.9074,
+        "stdev_ms": 0.043,
+        "peak_vram_mib": 347,
+        "tflops": 9.235
+      }
+    },
+    {
+      "label": "[Qwen-Image-2512] 1664x928  bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 6121,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 21.5783,
+        "median_ms": 21.5623,
+        "min_ms": 21.4529,
+        "max_ms": 21.7395,
+        "stdev_ms": 0.0875,
+        "peak_vram_mib": 309,
+        "tflops": 21.352
+      },
+      "sdpa": {
+        "mean_ms": 49.5191,
+        "median_ms": 49.5061,
+        "min_ms": 49.4885,
+        "max_ms": 49.6119,
+        "stdev_ms": 0.0385,
+        "peak_vram_mib": 309,
+        "tflops": 9.3
+      }
+    },
+    {
+      "label": "[Qwen-Image-2512] 1920x1920 bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 14489,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 118.9245,
+        "median_ms": 119.0781,
+        "min_ms": 117.5261,
+        "max_ms": 119.1843,
+        "stdev_ms": 0.4955,
+        "peak_vram_mib": 623,
+        "tflops": 21.663
+      },
+      "sdpa": {
+        "mean_ms": 289.0093,
+        "median_ms": 287.3245,
+        "min_ms": 285.5459,
+        "max_ms": 293.1168,
+        "stdev_ms": 3.5456,
+        "peak_vram_mib": 623,
+        "tflops": 8.978
+      }
+    },
+    {
+      "label": "[Qwen-Image-2512] 2560x1440 bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 14489,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 125.5303,
+        "median_ms": 125.5189,
+        "min_ms": 125.3137,
+        "max_ms": 125.8271,
+        "stdev_ms": 0.1328,
+        "peak_vram_mib": 623,
+        "tflops": 20.552
+      },
+      "sdpa": {
+        "mean_ms": 299.9092,
+        "median_ms": 301.0409,
+        "min_ms": 293.5189,
+        "max_ms": 301.2277,
+        "stdev_ms": 2.601,
+        "peak_vram_mib": 623,
+        "tflops": 8.569
+      }
+    },
+    {
+      "label": "[Qwen-Image-Edit-2511] 1328x1328 bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 6912,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 30.5858,
+        "median_ms": 30.5862,
+        "min_ms": 30.3646,
+        "max_ms": 30.7292,
+        "stdev_ms": 0.1079,
+        "peak_vram_mib": 347,
+        "tflops": 19.194
+      },
+      "sdpa": {
+        "mean_ms": 67.7123,
+        "median_ms": 68.119,
+        "min_ms": 66.3018,
+        "max_ms": 68.1982,
+        "stdev_ms": 0.7696,
+        "peak_vram_mib": 347,
+        "tflops": 8.618
+      }
+    },
+    {
+      "label": "[Qwen-Image-Edit-2511] 1664x928  bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 6055,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 24.1362,
+        "median_ms": 24.1265,
+        "min_ms": 24.0206,
+        "max_ms": 24.2323,
+        "stdev_ms": 0.0687,
+        "peak_vram_mib": 309,
+        "tflops": 18.673
+      },
+      "sdpa": {
+        "mean_ms": 53.4375,
+        "median_ms": 53.4348,
+        "min_ms": 53.3765,
+        "max_ms": 53.4801,
+        "stdev_ms": 0.0304,
+        "peak_vram_mib": 309,
+        "tflops": 8.431
+      }
+    },
+    {
+      "label": "[Qwen-Image-Edit-2511] 1920x1920 bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 14423,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 128.5037,
+        "median_ms": 128.5196,
+        "min_ms": 128.3946,
+        "max_ms": 128.6179,
+        "stdev_ms": 0.0706,
+        "peak_vram_mib": 623,
+        "tflops": 19.889
+      },
+      "sdpa": {
+        "mean_ms": 296.828,
+        "median_ms": 296.8189,
+        "min_ms": 296.783,
+        "max_ms": 296.9572,
+        "stdev_ms": 0.0507,
+        "peak_vram_mib": 623,
+        "tflops": 8.612
+      }
+    },
+    {
+      "label": "[Qwen-Image-Edit-2511] 2560x1440 bf16",
+      "batch": 1,
+      "heads": 24,
+      "seq": 14423,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 128.4806,
+        "median_ms": 128.503,
+        "min_ms": 128.262,
+        "max_ms": 128.7804,
+        "stdev_ms": 0.1737,
+        "peak_vram_mib": 623,
+        "tflops": 19.892
+      },
+      "sdpa": {
+        "mean_ms": 296.9768,
+        "median_ms": 296.9682,
+        "min_ms": 296.8904,
+        "max_ms": 297.115,
+        "stdev_ms": 0.0621,
+        "peak_vram_mib": 623,
+        "tflops": 8.608
+      }
+    },
+    {
+      "label": "[ERNIE-Image (Turbo)] 1024x1024 bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 4097,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 15.7275,
+        "median_ms": 15.7185,
+        "min_ms": 15.661,
+        "max_ms": 15.8909,
+        "stdev_ms": 0.073,
+        "peak_vram_mib": 299,
+        "tflops": 17.496
+      },
+      "sdpa": {
+        "mean_ms": 32.4209,
+        "median_ms": 32.3919,
+        "min_ms": 32.3482,
+        "max_ms": 32.5631,
+        "stdev_ms": 0.067,
+        "peak_vram_mib": 299,
+        "tflops": 8.49
+      }
+    },
+    {
+      "label": "[ERNIE-Image (Turbo)] 1344x768  bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 4033,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 14.5735,
+        "median_ms": 14.5643,
+        "min_ms": 14.5252,
+        "max_ms": 14.6794,
+        "stdev_ms": 0.0494,
+        "peak_vram_mib": 285,
+        "tflops": 18.297
+      },
+      "sdpa": {
+        "mean_ms": 31.1162,
+        "median_ms": 31.095,
+        "min_ms": 31.0559,
+        "max_ms": 31.251,
+        "stdev_ms": 0.0607,
+        "peak_vram_mib": 285,
+        "tflops": 8.57
+      }
+    },
+    {
+      "label": "[LTX-2.3] 960x544   bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 8160,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 56.8277,
+        "median_ms": 56.8225,
+        "min_ms": 56.7434,
+        "max_ms": 56.9332,
+        "stdev_ms": 0.0598,
+        "peak_vram_mib": 481,
+        "tflops": 19.199
+      },
+      "sdpa": {
+        "mean_ms": 124.9892,
+        "median_ms": 124.9868,
+        "min_ms": 124.8597,
+        "max_ms": 125.0759,
+        "stdev_ms": 0.0595,
+        "peak_vram_mib": 481,
+        "tflops": 8.728
+      }
+    },
+    {
+      "label": "[LTX-2.3] 1280x736  bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 14720,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 173.8412,
+        "median_ms": 173.9213,
+        "min_ms": 173.4558,
+        "max_ms": 174.0764,
+        "stdev_ms": 0.2152,
+        "peak_vram_mib": 807,
+        "tflops": 20.412
+      },
+      "sdpa": {
+        "mean_ms": 395.4583,
+        "median_ms": 395.4183,
+        "min_ms": 395.297,
+        "max_ms": 395.7896,
+        "stdev_ms": 0.1613,
+        "peak_vram_mib": 807,
+        "tflops": 8.978
+      }
+    },
+    {
+      "label": "[LTX-2.3] 1600x960  bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 24000,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 433.8054,
+        "median_ms": 433.8357,
+        "min_ms": 433.6147,
+        "max_ms": 433.9466,
+        "stdev_ms": 0.1137,
+        "peak_vram_mib": 1257,
+        "tflops": 21.753
+      },
+      "sdpa": {
+        "mean_ms": 1016.0115,
+        "median_ms": 1016.0502,
+        "min_ms": 1015.4575,
+        "max_ms": 1016.9823,
+        "stdev_ms": 0.4775,
+        "peak_vram_mib": 1257,
+        "tflops": 9.288
+      }
+    },
+    {
+      "label": "[LTX-2.3] 1920x1088 bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 32640,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 775.9826,
+        "median_ms": 776.1672,
+        "min_ms": 775.0191,
+        "max_ms": 776.4559,
+        "stdev_ms": 0.4981,
+        "peak_vram_mib": 1681,
+        "tflops": 22.489
+      },
+      "sdpa": {
+        "mean_ms": 1845.2224,
+        "median_ms": 1845.266,
+        "min_ms": 1839.2082,
+        "max_ms": 1851.9293,
+        "stdev_ms": 5.7478,
+        "peak_vram_mib": 1681,
+        "tflops": 9.459
+      }
+    },
+    {
+      "label": "[Wan2.2] 832x480   fp16",
+      "batch": 1,
+      "heads": 40,
+      "seq": 7800,
+      "head_dim": 128,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 57.4645,
+        "median_ms": 57.4536,
+        "min_ms": 57.3956,
+        "max_ms": 57.5625,
+        "stdev_ms": 0.0569,
+        "peak_vram_mib": 493,
+        "tflops": 21.687
+      },
+      "sdpa": {
+        "mean_ms": 133.9237,
+        "median_ms": 133.916,
+        "min_ms": 133.8764,
+        "max_ms": 133.9917,
+        "stdev_ms": 0.037,
+        "peak_vram_mib": 493,
+        "tflops": 9.304
+      }
+    },
+    {
+      "label": "[Wan2.2] 960x544   fp16",
+      "batch": 1,
+      "heads": 40,
+      "seq": 10200,
+      "head_dim": 128,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 97.2121,
+        "median_ms": 97.2158,
+        "min_ms": 97.1117,
+        "max_ms": 97.2895,
+        "stdev_ms": 0.0589,
+        "peak_vram_mib": 607,
+        "tflops": 21.918
+      },
+      "sdpa": {
+        "mean_ms": 229.5448,
+        "median_ms": 229.5378,
+        "min_ms": 229.4657,
+        "max_ms": 229.6572,
+        "stdev_ms": 0.0615,
+        "peak_vram_mib": 607,
+        "tflops": 9.283
+      }
+    },
+    {
+      "label": "[Wan2.2] 1280x720  fp16",
+      "batch": 1,
+      "heads": 40,
+      "seq": 18000,
+      "head_dim": 128,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 298.5987,
+        "median_ms": 298.5979,
+        "min_ms": 298.3149,
+        "max_ms": 298.9143,
+        "stdev_ms": 0.165,
+        "peak_vram_mib": 1007,
+        "tflops": 22.222
+      },
+      "sdpa": {
+        "mean_ms": 708.6501,
+        "median_ms": 708.5527,
+        "min_ms": 705.834,
+        "max_ms": 714.4101,
+        "stdev_ms": 3.1764,
+        "peak_vram_mib": 1007,
+        "tflops": 9.365
+      }
+    },
+    {
+      "label": "[Wan2.2] 1920x1088 fp16",
+      "batch": 1,
+      "heads": 40,
+      "seq": 40800,
+      "head_dim": 128,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 1507.649,
+        "median_ms": 1509.3745,
+        "min_ms": 1494.9746,
+        "max_ms": 1522.5298,
+        "stdev_ms": 10.0857,
+        "peak_vram_mib": 2181,
+        "tflops": 22.587
+      },
+      "sdpa": {
+        "mean_ms": 3648.6581,
+        "median_ms": 3653.568,
+        "min_ms": 3621.1159,
+        "max_ms": 3667.3998,
+        "stdev_ms": 16.0006,
+        "peak_vram_mib": 2181,
+        "tflops": 9.331
+      }
+    },
+    {
+      "label": "[HunyuanVideo-1.5] 848x480   fp16",
+      "batch": 1,
+      "heads": 16,
+      "seq": 49367,
+      "head_dim": 128,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 886.4201,
+        "median_ms": 885.6593,
+        "min_ms": 883.4196,
+        "max_ms": 892.2533,
+        "stdev_ms": 2.8317,
+        "peak_vram_mib": 1103,
+        "tflops": 22.542
+      },
+      "sdpa": {
+        "mean_ms": 2145.4349,
+        "median_ms": 2145.5426,
+        "min_ms": 2128.0479,
+        "max_ms": 2173.1118,
+        "stdev_ms": 14.3318,
+        "peak_vram_mib": 1103,
+        "tflops": 9.305
+      }
+    },
+    {
+      "label": "[HunyuanVideo-1.5] 1280x720  fp16",
+      "batch": 1,
+      "heads": 16,
+      "seq": 111677,
+      "head_dim": 128,
+      "dtype": "fp16",
+      "sa2": {
+        "mean_ms": 4538.407,
+        "median_ms": 4542.3021,
+        "min_ms": 4504.1734,
+        "max_ms": 4571.8639,
+        "stdev_ms": 18.7631,
+        "peak_vram_mib": 2383,
+        "tflops": 22.493
+      },
+      "sdpa": {
+        "mean_ms": 11088.9251,
+        "median_ms": 11070.4249,
+        "min_ms": 10989.3746,
+        "max_ms": 11217.5156,
+        "stdev_ms": 67.5438,
+        "peak_vram_mib": 2383,
+        "tflops": 9.229
+      }
+    },
+    {
+      "label": "[HunyuanVideo-1.5] 1920x1088 fp16",
+      "batch": 1,
+      "heads": 16,
+      "seq": 253037,
+      "head_dim": 128,
+      "dtype": "fp16",
+      "skip": "requires 8GB VRAM, device has 4GB"
+    },
+    {
+      "label": "[ACE-Step-1.5] text-attn        bf16",
+      "batch": 1,
+      "heads": 16,
+      "seq": 326,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 0.2656,
+        "median_ms": 0.2371,
+        "min_ms": 0.2211,
+        "max_ms": 0.4079,
+        "stdev_ms": 0.0611,
+        "peak_vram_mib": 101,
+        "tflops": 3.672
+      },
+      "sdpa": {
+        "mean_ms": 0.1581,
+        "median_ms": 0.1514,
+        "min_ms": 0.1496,
+        "max_ms": 0.2035,
+        "stdev_ms": 0.0166,
+        "peak_vram_mib": 101,
+        "tflops": 5.749
+      }
+    },
+    {
+      "label": "[ACE-Step-1.5] audio 50s        bf16",
+      "batch": 1,
+      "heads": 16,
+      "seq": 1250,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 0.9601,
+        "median_ms": 0.9123,
+        "min_ms": 0.8841,
+        "max_ms": 1.1364,
+        "stdev_ms": 0.0937,
+        "peak_vram_mib": 113,
+        "tflops": 14.03
+      },
+      "sdpa": {
+        "mean_ms": 1.5138,
+        "median_ms": 1.5117,
+        "min_ms": 1.4897,
+        "max_ms": 1.5559,
+        "stdev_ms": 0.0201,
+        "peak_vram_mib": 113,
+        "tflops": 8.467
+      }
+    },
+    {
+      "label": "[ACE-Step-1.5] audio 50s cross  bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 625,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 0.614,
+        "median_ms": 0.6027,
+        "min_ms": 0.5919,
+        "max_ms": 0.721,
+        "stdev_ms": 0.0382,
+        "peak_vram_mib": 121,
+        "tflops": 10.619
+      },
+      "sdpa": {
+        "mean_ms": 0.7978,
+        "median_ms": 0.7947,
+        "min_ms": 0.7632,
+        "max_ms": 0.879,
+        "stdev_ms": 0.0361,
+        "peak_vram_mib": 121,
+        "tflops": 8.053
+      }
+    },
+    {
+      "label": "[ACE-Step-1.5] audio 100s       bf16",
+      "batch": 1,
+      "heads": 16,
+      "seq": 2500,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 2.8949,
+        "median_ms": 2.8494,
+        "min_ms": 2.833,
+        "max_ms": 3.2191,
+        "stdev_ms": 0.1172,
+        "peak_vram_mib": 153,
+        "tflops": 17.969
+      },
+      "sdpa": {
+        "mean_ms": 5.8168,
+        "median_ms": 5.8092,
+        "min_ms": 5.7459,
+        "max_ms": 5.959,
+        "stdev_ms": 0.058,
+        "peak_vram_mib": 153,
+        "tflops": 8.814
+      }
+    },
+    {
+      "label": "[ACE-Step-1.5] audio 100s cross bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 1250,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 1.7516,
+        "median_ms": 1.744,
+        "min_ms": 1.7119,
+        "max_ms": 1.8596,
+        "stdev_ms": 0.0437,
+        "peak_vram_mib": 153,
+        "tflops": 14.679
+      },
+      "sdpa": {
+        "mean_ms": 2.9594,
+        "median_ms": 2.9517,
+        "min_ms": 2.9294,
+        "max_ms": 3.0265,
+        "stdev_ms": 0.034,
+        "peak_vram_mib": 153,
+        "tflops": 8.673
+      }
+    },
+    {
+      "label": "[ACE-Step-1.5] audio 150s       bf16",
+      "batch": 1,
+      "heads": 16,
+      "seq": 3750,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 5.9367,
+        "median_ms": 5.9104,
+        "min_ms": 5.8639,
+        "max_ms": 6.208,
+        "stdev_ms": 0.0998,
+        "peak_vram_mib": 193,
+        "tflops": 19.491
+      },
+      "sdpa": {
+        "mean_ms": 12.6851,
+        "median_ms": 12.6611,
+        "min_ms": 12.6383,
+        "max_ms": 12.8409,
+        "stdev_ms": 0.062,
+        "peak_vram_mib": 193,
+        "tflops": 9.099
+      }
+    },
+    {
+      "label": "[ACE-Step-1.5] audio 150s cross bf16",
+      "batch": 1,
+      "heads": 32,
+      "seq": 1875,
+      "head_dim": 128,
+      "dtype": "bf16",
+      "sa2": {
+        "mean_ms": 3.3971,
+        "median_ms": 3.3902,
+        "min_ms": 3.375,
+        "max_ms": 3.4608,
+        "stdev_ms": 0.0261,
+        "peak_vram_mib": 193,
+        "tflops": 16.99
+      },
+      "sdpa": {
+        "mean_ms": 6.5345,
+        "median_ms": 6.5431,
+        "min_ms": 6.4763,
+        "max_ms": 6.597,
+        "stdev_ms": 0.0424,
+        "peak_vram_mib": 193,
+        "tflops": 8.803
+      }
+    }
+  ]
+}
